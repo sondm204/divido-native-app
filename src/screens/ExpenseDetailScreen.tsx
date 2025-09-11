@@ -20,7 +20,9 @@ export default function ExpenseDetailScreen() {
 
 
     useEffect(() => {
-        dispatch(fetchBill(expenseId));
+        if(expense?.bills?.length === 0) {
+            dispatch(fetchBill(expenseId));
+        }
     }, [expenseId]);
 
     function formatCurrency(value: number) {

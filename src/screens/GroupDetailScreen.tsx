@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   SafeAreaView,
   FlatList,
@@ -12,7 +12,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { Expense } from "../store/slices/expensesSlice";
-import { fetchBill } from "../store/slices/groupsSlice";
+import { fetchBill, fetchExpenses } from "../store/slices/groupsSlice";
 
 // ---- Types ----
 type RootStackParamList = {
@@ -30,12 +30,17 @@ export default function GroupDetailScreen() {
   const currentGroup = useSelector((state: RootState) => state.groups.currentGroup);
   const expenses = useSelector((state: RootState) => state.groups.currentGroup?.expenses);
   const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    if(expenses?.length === 0) {
+      dispatch(fetchExpenses(groupId));
+    }
+  }, [groupId]);
   
   function renderExpense({ item }: { item: Expense }) {
     return (
       <TouchableOpacity
         onPress={() => {
-          dispatch(fetchBill(item.id));
           navigation.navigate('ExpenseDetail', { expenseId: item.id });
         }}
         className="mx-3 my-1 p-3 bg-white rounded-lg shadow-sm"

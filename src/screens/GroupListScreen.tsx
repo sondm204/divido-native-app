@@ -35,7 +35,6 @@ export default function GroupsListScreen() {
             <TouchableOpacity
                 onPress={() => {
                     dispatch(setCurrentGroup(item));
-                    dispatch(fetchExpenses(item.id));
                     navigation.navigate("GroupDetail", { groupId: item.id })
                 }}
                 className="py-3"
