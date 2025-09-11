@@ -114,7 +114,12 @@ const groupsSlice = createSlice({
         state.groups.push(action.payload);
       })
       // fetch expenses
+      .addCase(fetchExpenses.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(fetchExpenses.fulfilled, (state, action: PayloadAction<{ groupId: string; expenses: Expense[] }>) => {
+        state.loading = false;
         const { groupId, expenses } = action.payload;
         const group = Array.isArray(state.groups) ? state.groups.find(group => group.id === groupId) || null : null;
         if (group) {
@@ -122,8 +127,17 @@ const groupsSlice = createSlice({
           state.currentGroup = group;
         }
       })
+      .addCase(fetchExpenses.rejected, (state, action) => {
+        state.loading = false;
+        state.error = typeof action.payload === 'string' ? action.payload : (action.error.message ?? 'Error');
+      })
       // fetch bill
+      .addCase(fetchBill.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(fetchBill.fulfilled, (state, action) => {
+        state.loading = false;
         const { expenseId, bill } = action.payload;
         const group = Array.isArray(state.groups) ? state.groups.find(group => group.id === state.selectedGroupId) || null : null;
         if (group) {
@@ -133,6 +147,10 @@ const groupsSlice = createSlice({
             state.currentGroup = group;
           }
         }
+      })
+      .addCase(fetchBill.rejected, (state, action) => {
+        state.loading = false;
+        state.error = typeof action.payload === 'string' ? action.payload : (action.error.message ?? 'Error');
       });
   },
 });

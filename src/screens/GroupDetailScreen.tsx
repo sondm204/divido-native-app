@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { Expense } from "../store/slices/expensesSlice";
 import { fetchBill, fetchExpenses } from "../store/slices/groupsSlice";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 // ---- Types ----
 type RootStackParamList = {
@@ -29,6 +30,7 @@ export default function GroupDetailScreen() {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const currentGroup = useSelector((state: RootState) => state.groups.currentGroup);
   const expenses = useSelector((state: RootState) => state.groups.currentGroup?.expenses);
+  const loading = useSelector((state: RootState) => state.groups.loading);
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
@@ -82,6 +84,7 @@ export default function GroupDetailScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      <LoadingOverlay visible={loading} text="Đang tải chi tiêu..." />
     </SafeAreaView>
   );
 }
