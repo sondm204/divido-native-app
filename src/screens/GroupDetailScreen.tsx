@@ -12,7 +12,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { Expense } from "../store/slices/expensesSlice";
-import { fetchBill, fetchExpenses } from "../store/slices/groupsSlice";
+import { fetchBill, fetchExpenses, Group } from "../store/slices/groupsSlice";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 // ---- Types ----
@@ -20,6 +20,7 @@ type RootStackParamList = {
   GroupDetail: { groupId: string };
   AddExpense: { groupId: string };
   ExpenseDetail: { expenseId: string };
+  GroupForm: { type: 'add' | 'edit', groupData: Group };
 };
 
 
@@ -62,7 +63,7 @@ export default function GroupDetailScreen() {
     <SafeAreaView className="flex-1">
       <View className="px-4 py-3 flex-row items-center justify-between">
         <Text className="text-lg font-bold">{currentGroup?.name}</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('GroupForm', { type: 'edit', groupData: currentGroup as Group })}>
           <Text className="text-[#0F6BF0]">Members</Text>
         </TouchableOpacity>
       </View>

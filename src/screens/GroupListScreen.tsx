@@ -9,7 +9,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchExpenses, fetchGroups, Group, setCurrentGroup } from "../store/slices/groupsSlice";
+import { fetchGroups, Group, setCurrentGroup } from "../store/slices/groupsSlice";
 import { AppDispatch, RootState } from "../store/store";
 import LoadingOverlay from "../components/LoadingOverlay";
 
@@ -17,7 +17,7 @@ import LoadingOverlay from "../components/LoadingOverlay";
 type RootStackParamList = {
     GroupsList: undefined;
     GroupDetail: { groupId: string };
-    AddGroup: undefined;
+    GroupForm: { type: 'add' | 'edit', groupData: Group };
 };
 
 export default function GroupsListScreen() {
@@ -68,7 +68,7 @@ export default function GroupsListScreen() {
         <SafeAreaView className="flex-1 px-4">
             <Text className="text-4xl font-bold mb-4">Nhóm</Text>
             <FlatList data={groups} keyExtractor={(g) => g.id} renderItem={renderItem} />
-            <TouchableOpacity onPress={() => navigation.navigate("AddGroup")} className="absolute right-6 bottom-8 w-14 h-14 bg-[#0F6BF0] rounded-full items-center justify-center shadow-lg">
+            <TouchableOpacity onPress={() => navigation.navigate("GroupForm", { type: 'add', groupData: { id: '', name: '', users: [], createdAt: '' } })} className="absolute right-6 bottom-8 w-14 h-14 bg-[#0F6BF0] rounded-full items-center justify-center shadow-lg">
                 <Text className="text-white text-2xl">+</Text>
             </TouchableOpacity>
             <LoadingOverlay visible={loading} text="Đang tải nhóm..." />
