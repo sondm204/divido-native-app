@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 import { User } from "./userSlice";
-import { Bill, Category, Expense } from "./expensesSlice";
+import { Bill, Category, Expense, ShareRatio } from "./expensesSlice";
 import { EXPENSE_SERVICE_URL, GROUP_SERVICE_URL } from "../../commons/constants";
 
 // type cho Group
@@ -60,9 +60,16 @@ export const fetchExpenses = createAsyncThunk(
     try {
       const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}/expenses`);
       const data = await res.json();
+      const expenses = data.map((expense: any) => ({
+        ...expense,
+        shareRatios: expense.shareRatios.map((s: any) => ({
+          username: s.user.name,
+          ratio: s.ratio
+        })) as ShareRatio[]
+      }));
       return {
         groupId,
-        expenses: data
+        expenses: expenses
       };
     } catch (error) {
       return rejectWithValue("Failed to fetch expenses");
