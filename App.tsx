@@ -5,19 +5,19 @@ import "./global.css"; // dùng cho NativeWind
 
 import GroupsListScreen from "./src/screens/GroupListScreen";
 import GroupDetailScreen from "./src/screens/GroupDetailScreen";
-import AddGroupScreen from "./src/screens/AddGroupScreen";
+import GroupFormScreen from "./src/screens/GroupFormScreen";
 import AddExpenseScreen from "./src/screens/AddExpenseScreen";
 import { Provider } from "react-redux";
 import { store } from "./src/store/store";
 import ExpenseDetailScreen from "./src/screens/ExpenseDetailScreen";
-import { Expense } from "./src/store/slices/expensesSlice";
 import AppWrapper from "./src/components/AppWrapper";
+import { Group } from "./src/store/slices/groupsSlice";
 
 // ---- Types ----
 export type RootStackParamList = {
   GroupsList: undefined;
   GroupDetail: { groupId: string };
-  AddGroup: undefined;
+  GroupForm: { type: 'add' | 'edit', groupData: Group };
   AddExpense: { groupId: string };
   ExpenseDetail: { expenseId: string };
 };
@@ -50,8 +50,8 @@ export default function App() {
             options={{ title: "Group Detail", headerShown: false }}
             />
             <Stack.Screen
-            name="AddGroup"
-            component={AddGroupScreen}
+            name="GroupForm"
+            component={GroupFormScreen}
             options={{ title: "Thêm nhóm" }}
             />
             <Stack.Screen

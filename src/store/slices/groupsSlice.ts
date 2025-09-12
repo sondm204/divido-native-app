@@ -39,7 +39,11 @@ export const fetchGroups = createAsyncThunk("groups/fetch", async () => {
 
 export const createGroup = createAsyncThunk(
   "groups/create",
-  async (body: { name: string; desc?: string }) => {
+  async (body: {
+    name: string,
+    users?: User[],
+    createdAt: string
+  }) => {
     const res = await fetch(GROUP_SERVICE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -52,26 +56,33 @@ export const createGroup = createAsyncThunk(
 
 export const fetchExpenses = createAsyncThunk(
   "groups/fetchExpenses",
-  async (groupId: string) => {
-    const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}/expenses`);
-    if (!res.ok) throw new Error("Failed to fetch expenses");
-    return (await res.json()) as Expense[];
+  async (groupId: string, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}/expenses`);
+      const data = await res.json();
+      return {
+        groupId,
+        expenses: data
+      };
+    } catch (error) {
+      return rejectWithValue("Failed to fetch expenses");
+    }
   }
 );
 
 export const fetchBill = createAsyncThunk(
   "expenseEditor/fetchBill",
   async (expenseId: string, { rejectWithValue }) => {
-      try {
-          const response = await fetch(`${EXPENSE_SERVICE_URL}/${expenseId}/bill`);
-          const data = await response.json();
-          return {
-            expenseId,
-            bill: data
-          }
-      } catch (error) {
-          return rejectWithValue("Failed to fetch expenses");
+    try {
+      const response = await fetch(`${EXPENSE_SERVICE_URL}/${expenseId}/bill`);
+      const data = await response.json();
+      return {
+        expenseId,
+        bill: data
       }
+    } catch (error) {
+      return rejectWithValue("Failed to fetch expenses");
+    }
   }
 )
 
@@ -107,24 +118,48 @@ const groupsSlice = createSlice({
         state.groups.push(action.payload);
       })
       // fetch expenses
-      .addCase(fetchExpenses.fulfilled, (state, action: PayloadAction<Expense[]>) => {
-        state.currentGroup!.expenses = action.payload;
+      .addCase(fetchExpenses.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchExpenses.fulfilled, (state, action: PayloadAction<{ groupId: string; expenses: Expense[] }>) => {
+        state.loading = false;
+        const { groupId, expenses } = action.payload;
+        const group = Array.isArray(state.groups) ? state.groups.find(group => group.id === groupId) || null : null;
+        if (group) {
+          group.expenses = expenses;
+          state.currentGroup = group;
+        }
+      })
+      .addCase(fetchExpenses.rejected, (state, action) => {
+        state.loading = false;
+        state.error = typeof action.payload === 'string' ? action.payload : (action.error.message ?? 'Error');
       })
       // fetch bill
+      .addCase(fetchBill.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(fetchBill.fulfilled, (state, action) => {
+        state.loading = false;
         const { expenseId, bill } = action.payload;
         const group = Array.isArray(state.groups) ? state.groups.find(group => group.id === state.selectedGroupId) || null : null;
         if (group) {
-            const expense = group.expenses?.find(expense => expense.id === expenseId) || null;
-            if (expense) {
-                expense.bills = bill;
-            }
+          const expense = group.expenses?.find(expense => expense.id === expenseId) || null;
+          if (expense) {
+            expense.bills = bill;
+            state.currentGroup = group;
+          }
         }
-    });
+      })
+      .addCase(fetchBill.rejected, (state, action) => {
+        state.loading = false;
+        state.error = typeof action.payload === 'string' ? action.payload : (action.error.message ?? 'Error');
+      });
   },
 });
 
 export default groupsSlice.reducer;
 
 // selector
-export const {setCurrentGroup, setSelectedGroupId } = groupsSlice.actions;
+export const { setCurrentGroup, setSelectedGroupId } = groupsSlice.actions;

@@ -9,6 +9,7 @@ import { fetchBill } from "../store/slices/groupsSlice";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store/store";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 type ExpenseDetailRouteProp = RouteProp<RootStackParamList, "ExpenseDetail">;
 
@@ -17,10 +18,13 @@ export default function ExpenseDetailScreen() {
     const { expenseId } = route.params;
     const dispatch = useDispatch<AppDispatch>();
     const expense = useSelector((state: RootState) => state.groups.currentGroup?.expenses?.find(expense => expense.id === expenseId));
+    const loading = useSelector((state: RootState) => state.groups.loading);
 
 
     useEffect(() => {
-        dispatch(fetchBill(expenseId));
+        if(expense?.bills?.length === 0) {
+            dispatch(fetchBill(expenseId));
+        }
     }, [expenseId]);
 
     function formatCurrency(value: number) {
@@ -100,6 +104,7 @@ export default function ExpenseDetailScreen() {
                     ))}
                 </View>
             )}
+            <LoadingOverlay visible={loading} text="Đang tải hóa đơn..." />
         </SafeAreaView>
     );
 }
