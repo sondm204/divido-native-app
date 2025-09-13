@@ -8,7 +8,7 @@ interface AppInputProps extends TextInputProps {
 
 export default function AppInput({ label, error, ...props }: AppInputProps) {
   return (
-    <View className="mb-4">
+    <View>
       {label && <Text className="text-sm text-slate-600 mb-2">{label}</Text>}
       <TextInput
         {...props}

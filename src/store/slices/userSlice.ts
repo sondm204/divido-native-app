@@ -46,6 +46,20 @@ export const fetchCurrentUser = createAsyncThunk(
     }
 );
 
+export const getUserByEmail = async (params: { email: string }) => {
+    const endpoint = `${USER_SERVICE_URL}/email/${params.email}`;
+
+    const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    const data = await response.json();
+    return data;
+}
+
 
 export const { setCurrentUser } = userSlice.actions;
 
