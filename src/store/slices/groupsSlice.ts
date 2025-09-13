@@ -44,6 +44,7 @@ export const createGroup = createAsyncThunk(
     users?: User[],
     createdAt: string
   }) => {
+    console.log(body);
     const res = await fetch(GROUP_SERVICE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
