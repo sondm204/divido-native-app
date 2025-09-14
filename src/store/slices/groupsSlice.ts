@@ -44,7 +44,6 @@ export const createGroup = createAsyncThunk(
     users?: User[],
     createdAt: string
   }) => {
-    console.log(body);
     const res = await fetch(GROUP_SERVICE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -52,6 +51,15 @@ export const createGroup = createAsyncThunk(
     });
     if (!res.ok) throw new Error("Failed to create group");
     return (await res.json()) as Group;
+  }
+);
+
+export const deleteGroup = createAsyncThunk(
+  "groups/delete",
+  async (groupId: string) => {
+    const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Failed to delete group");
+    return groupId;
   }
 );
 
@@ -122,8 +130,31 @@ const groupsSlice = createSlice({
         state.error = action.error.message ?? "Error";
       })
       // create group
+      .addCase(createGroup.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(createGroup.fulfilled, (state, action: PayloadAction<Group>) => {
+        state.loading = false;
+        // Add the new group to the list
         state.groups.push(action.payload);
+      })
+      .addCase(createGroup.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to create group";
+      })
+      // delete group
+      .addCase(deleteGroup.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteGroup.fulfilled, (state, action: PayloadAction<string>) => {
+        state.loading = false;
+        state.groups = state.groups.filter(group => group.id !== action.payload);
+      })
+      .addCase(deleteGroup.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to delete group";
       })
       // fetch expenses
       .addCase(fetchExpenses.pending, (state) => {

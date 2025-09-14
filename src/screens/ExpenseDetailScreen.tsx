@@ -61,8 +61,8 @@ export default function ExpenseDetailScreen() {
                 <Text className="text-slate-900 font-bold mt-2">
                     Tổng: {formatCurrency(expense?.amount || 0 )}
                 </Text>
-                {expense?.shareRatios.map((s) => (
-                    <Text>
+                {expense?.shareRatios.map((s, index) => (
+                    <Text key={`${s.username}-${index}`}>
                         {s.username}: {formatCurrency(s.ratio * expense?.amount)}
                     </Text>
                 ))}
