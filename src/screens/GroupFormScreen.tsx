@@ -8,7 +8,7 @@ import type { AppDispatch } from "../store/store";
 import { RootStackParamList } from "../../App";
 import AppInput from "../components/AppInput";
 import AppButton from "../components/AppButton";
-import { Group, createGroup } from "../store/slices/groupsSlice";
+import { Group, createGroup, fetchGroups } from "../store/slices/groupsSlice";
 import { User } from "../store/slices/userSlice";
 import { getUserByEmail } from "../store/slices/userSlice";
 
@@ -63,13 +63,28 @@ export default function GroupFormScreen() {
     setFormData({ ...formData, users: formData.users?.filter((user) => user.id !== userId) });
   }
 
-  function handleCreate() {
+  async function handleCreate() {
     if (type === 'add') {
-      dispatch(createGroup({
-        name: formData.name,
-        users: formData.users,
-        createdAt: formData.createdAt
-      }));
+      // Validate that name is not empty
+      if (!formData.name.trim()) {
+        alert('Vui lòng nhập tên nhóm');
+        return;
+      }
+      
+      try {
+        await dispatch(createGroup({
+          name: formData.name.trim(),
+          users: formData.users,
+          createdAt: formData.createdAt
+        })).unwrap();
+        
+        // Refetch groups to ensure we have the latest data
+        dispatch(fetchGroups());
+      } catch (error) {
+        console.error('Failed to create group:', error);
+        alert('Không thể tạo nhóm. Vui lòng thử lại.');
+        return;
+      }
     }
     navigation.goBack();
   }

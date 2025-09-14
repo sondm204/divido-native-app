@@ -45,15 +45,15 @@ export default function GroupsListScreen() {
                     <View className="w-12 h-12 rounded-full bg-slate-200 mr-3 items-center justify-center">
                         <Text className="text-lg font-semibold text-slate-700">
                             {item.name
-                                .split(" ")
-                                .map((s) => s[0])
-                                .slice(0, 2)
-                                .join("")}
+                                ?.split(" ")
+                                ?.map((s) => s[0])
+                                ?.slice(0, 2)
+                                ?.join("") || "??"}
                         </Text>
                     </View>
                     <View className="flex-1">
                         <Text className="text-base font-medium text-slate-900">
-                            {item.name}
+                            {item.name || "Unnamed Group"}
                         </Text>
                         {item.users && (
                             <Text className="text-sm text-slate-500 mt-0.5">{item.users.map((user) => user.name).join(", ")}</Text>

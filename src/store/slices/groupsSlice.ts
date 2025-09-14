@@ -44,7 +44,6 @@ export const createGroup = createAsyncThunk(
     users?: User[],
     createdAt: string
   }) => {
-    console.log(body);
     const res = await fetch(GROUP_SERVICE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -122,8 +121,18 @@ const groupsSlice = createSlice({
         state.error = action.error.message ?? "Error";
       })
       // create group
+      .addCase(createGroup.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(createGroup.fulfilled, (state, action: PayloadAction<Group>) => {
+        state.loading = false;
+        // Add the new group to the list
         state.groups.push(action.payload);
+      })
+      .addCase(createGroup.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to create group";
       })
       // fetch expenses
       .addCase(fetchExpenses.pending, (state) => {
