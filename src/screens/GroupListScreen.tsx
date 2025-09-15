@@ -90,7 +90,7 @@ export default function GroupsListScreen() {
             {/* <FlatList data={groups} keyExtractor={(g) => g.id} renderItem={renderItem} /> */}
             <SwipeListView
                 data={groups}
-                keyExtractor={(g) => g.id}
+                keyExtractor={(g) => (g?.id ? String(g.id) : `${g.name}-${g.createdAt}`)}
                 renderItem={renderItem}
                 renderHiddenItem={renderHiddenItem}
                 leftOpenValue={0}
