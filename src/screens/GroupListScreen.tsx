@@ -9,7 +9,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteGroup, fetchGroups, Group, setCurrentGroup } from "../store/slices/groupsSlice";
+import { deleteGroup, fetchGroups, Group, setSelectedGroupId } from "../store/slices/groupsSlice";
 import { AppDispatch, RootState } from "../store/store";
 import LoadingOverlay from "../components/LoadingOverlay";
 import { Trash2, Trash } from "lucide-react-native";
@@ -42,7 +42,7 @@ export default function GroupsListScreen() {
         return (
             <TouchableOpacity
                 onPress={() => {
-                    dispatch(setCurrentGroup(item));
+                    dispatch(setSelectedGroupId(item.id));
                     navigation.navigate("GroupDetail", { groupId: item.id })
                 }}
                 className="py-3"

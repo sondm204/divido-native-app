@@ -8,10 +8,9 @@ import type { AppDispatch } from "../store/store";
 import { RootStackParamList } from "../../App";
 import AppInput from "../components/AppInput";
 import AppButton from "../components/AppButton";
-import { Group, createGroup, fetchGroups } from "../store/slices/groupsSlice";
+import { Group, createGroup, fetchGroups, updateGroup } from "../store/slices/groupsSlice";
 import { User } from "../store/slices/userSlice";
 import { getUserByEmail } from "../store/slices/userSlice";
-import { Button, ButtonText } from "../../components/ui/button";
 
 type GroupFormRouteProp = RouteProp<RootStackParamList, "GroupForm">;
 
@@ -86,15 +85,29 @@ export default function GroupFormScreen() {
         alert('Không thể tạo nhóm. Vui lòng thử lại.');
         return;
       }
+    } else {
+      try {
+        await dispatch(updateGroup({
+          id: formData.id,
+          name: formData.name.trim(),
+          users: formData.users,
+          createdAt: formData.createdAt
+        })).unwrap();
+        dispatch(fetchGroups());
+      } catch (error) {
+        console.error('Failed to update group:', error);
+        alert('Không thể cập nhật nhóm. Vui lòng thử lại.');
+        return;
+      }
     }
     navigation.goBack();
   }
 
   return (
     <SafeAreaView className="flex-1 p-4">
-      <Text className="text-lg font-bold mb-4">Tạo nhóm mới</Text>
+      <Text className="text-lg font-bold mb-4">{type === 'add' ? 'Tạo nhóm mới' : 'Chỉnh sửa nhóm'}</Text>
       <View className="mb-4">
-        <Text className="text-sm text-slate-600 mb-2">Tên nhóm2</Text>
+        <Text className="text-sm text-slate-600 mb-2">Tên nhóm</Text>
         <AppInput
           value={formData.name}
           onChangeText={(text) => setFormData({ ...formData, name: text })}
@@ -152,7 +165,7 @@ export default function GroupFormScreen() {
         />
       </View>
       <AppButton
-        title="Tạo nhóm"
+        title={type === 'add' ? 'Tạo nhóm' : 'Cập nhật'}
         variant="primary"
         onPress={handleCreate}
       />

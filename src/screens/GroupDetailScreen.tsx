@@ -29,13 +29,14 @@ export default function GroupDetailScreen() {
   const { groupId } = route.params;
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const currentGroup = useSelector((state: RootState) => state.groups.currentGroup);
-  const expenses = useSelector((state: RootState) => state.groups.currentGroup?.expenses);
+  const groups = useSelector((state: RootState) => state.groups.groups);
+  const group = groups.find(g => g.id === groupId);
+  const expenses = group?.expenses;
   const loading = useSelector((state: RootState) => state.groups.loading);
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    if(expenses?.length === 0) {
+    if((expenses?.length ?? 0) === 0) {
       dispatch(fetchExpenses(groupId));
     }
   }, [groupId]);
@@ -62,8 +63,8 @@ export default function GroupDetailScreen() {
   return (
     <SafeAreaView className="flex-1">
       <View className="px-4 py-3 flex-row items-center justify-between">
-        <Text className="text-lg font-bold">{currentGroup?.name}</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('GroupForm', { type: 'edit', groupData: currentGroup as Group })}>
+        <Text className="text-lg font-bold">{group?.name}</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('GroupForm', { type: 'edit', groupData: (group as Group) })}>
           <Text className="text-[#0F6BF0]">Members</Text>
         </TouchableOpacity>
       </View>

@@ -17,7 +17,7 @@ export default function ExpenseDetailScreen() {
     const route = useRoute<ExpenseDetailRouteProp>();
     const { expenseId } = route.params;
     const dispatch = useDispatch<AppDispatch>();
-    const expense = useSelector((state: RootState) => state.groups.currentGroup?.expenses?.find(expense => expense.id === expenseId));
+    const expense = useSelector((state: RootState) => state.groups.selectedGroupId ? state.groups.groups.find(group => group.id === state.groups.selectedGroupId)?.expenses?.find(expense => expense.id === expenseId) : null);
     const loading = useSelector((state: RootState) => state.groups.loading);
 
 
