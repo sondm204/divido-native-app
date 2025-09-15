@@ -10,7 +10,8 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store/store";
 import LoadingOverlay from "../components/LoadingOverlay";
-
+import { useState } from "react";
+import { Modal, TextInput, Button } from "react-native";
 type ExpenseDetailRouteProp = RouteProp<RootStackParamList, "ExpenseDetail">;
 
 export default function ExpenseDetailScreen() {
@@ -26,6 +27,14 @@ export default function ExpenseDetailScreen() {
             dispatch(fetchBill(expenseId));
         }
     }, [expenseId]);
+ function handleCreate() {
+    navigation.reload();
+  }
+
+const [showAddBill, setShowAddBill] = useState(false);
+const [billName, setBillName] = useState("");
+const [billAmount, setBillAmount] = useState("");
+const [billPrice, setBillPrice] = useState("");
 
     function formatCurrency(value: number) {
         return value.toLocaleString("vi-VN") + "đ";
@@ -105,6 +114,81 @@ export default function ExpenseDetailScreen() {
                 </View>
             )}
             <LoadingOverlay visible={loading} text="Đang tải hóa đơn..." />
+            <TouchableOpacity
+                className="absolute bottom-6 right-6 bg-blue-500 w-14 h-14 rounded-full items-center justify-center shadow"
+                onPress={() => setShowAddBill(true)} // mở form
+            >
+                <Text className="text-white text-2xl font-bold">+</Text>
+            </TouchableOpacity>
+            {/* Modal Form */}
+            <Modal
+                visible={showAddBill}
+                animationType="slide"
+                transparent
+                onRequestClose={() => setShowAddBill(false)}
+            >
+                <View className="flex-1 justify-center items-center bg-black/40">
+                    <View className="bg-white w-80 p-4 rounded-xl">
+                        <Text className="text-lg font-bold mb-3">Thêm bill</Text>
+
+                        <TextInput
+                            placeholder="Tên món"
+                            value={billName}
+                            onChangeText={setBillName}
+                            className="border border-gray-300 rounded-md px-2 py-1 mb-3"
+                        />
+                        <TextInput
+                            placeholder="Số lượng"
+                            keyboardType="numeric"
+                            value={billAmount}
+                            onChangeText={setBillAmount}
+                            className="border border-gray-300 rounded-md px-2 py-1 mb-3"
+                        />
+                        <TextInput
+                            placeholder="Số tiền"
+                            keyboardType="numeric"
+                            value={billPrice}
+                            onChangeText={setBillPrice}
+                            className="border border-gray-300 rounded-md px-2 py-1 mb-3"
+                        />
+
+                        <View className="flex-row justify-end">
+                            <Button title="Hủy" onPress={() => setShowAddBill(false)} />
+                            <View style={{ width: 8 }} />
+                            <Button
+                              title="Lưu"
+                              onPress={() => {
+                                if (!billName || !billAmount || !billPrice) {
+                                  alert("Vui lòng nhập đầy đủ thông tin");
+                                  return;
+                                }
+
+                                dispatch(
+                                  createBill({
+                                    expenseId: expenseId,
+                                    name: billName,
+                                    quantity: Number(billAmount),
+                                    unitPrice: Number(billPrice),
+                                  })
+                                )
+                                  .unwrap()
+                                  .then(() => {
+                                    setShowAddBill(false);
+                                    setBillName("");
+                                    setBillAmount("");
+                                    setBillPrice("");
+
+                                    dispatch(fetchBills(expenseId));
+                                  })
+                                  .catch(() => {
+                                    alert("Thêm bill thất bại!");
+                                  });
+                              }}
+                            />
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
