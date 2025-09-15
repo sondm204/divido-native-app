@@ -22,7 +22,7 @@ export default function ExpenseDetailScreen() {
 
 
     useEffect(() => {
-        if(expense?.bills?.length === 0) {
+        if (expense?.bills?.length === 0) {
             dispatch(fetchBill(expenseId));
         }
     }, [expenseId]);
@@ -33,16 +33,11 @@ export default function ExpenseDetailScreen() {
 
     const renderBillItem = ({ item }: { item: Bill }) => (
         <View className="flex-row items-center px-3 py-2 border-b border-slate-100">
-            <Text className="flex-1">{item.name}</Text>
-            <Text className="w-12 text-center">{item.quantity}</Text>
-            <Text className="w-20 text-right">{formatCurrency(item.unitPrice)}</Text>
-            <Text className="w-24 text-right">{formatCurrency(item.totalPrice)}</Text>
-            <TouchableOpacity className="ml-2">
-                <Pencil size={16} color="#0F6BF0" />
-            </TouchableOpacity>
-            <TouchableOpacity className="ml-2">
-                <Trash2 size={16} color="red" />
-            </TouchableOpacity>
+            <Text style={{ width: '25%' }} className="">{item.name}</Text>
+            <Text style={{ width: '10%' }} className="text-center">{item.quantity}</Text>
+            <Text style={{ width: '20%' }} className="text-right">{formatCurrency(item.unitPrice)}</Text>
+            <Text style={{ width: '20%' }} className="text-right">{formatCurrency(item.totalPrice)}</Text>
+            <Text style={{ width: '25%' }} className="text-right">{item.owner.map((o) => o.name).join(", ")}</Text>
         </View>
     );
 
@@ -59,7 +54,7 @@ export default function ExpenseDetailScreen() {
                 </Text>
                 <Text className="text-slate-600">Danh mục: {expense?.category.name}</Text>
                 <Text className="text-slate-900 font-bold mt-2">
-                    Tổng: {formatCurrency(expense?.amount || 0 )}
+                    Tổng: {formatCurrency(expense?.amount || 0)}
                 </Text>
                 {expense?.shareRatios.map((s, index) => (
                     <Text key={`${s.username}-${index}`}>
@@ -72,29 +67,17 @@ export default function ExpenseDetailScreen() {
             {expense?.bills && expense?.bills.length > 0 && (
                 <View className="bg-white rounded-xl shadow">
                     <View className="flex-row px-3 py-2 border-b border-slate-200">
-                        <Text className="flex-1 font-semibold">Tên món</Text>
-                        <Text className="w-12 text-center font-semibold">SL</Text>
-                        <Text className="w-20 text-right font-semibold">Đơn giá</Text>
-                        <Text className="w-24 text-right font-semibold">Tổng</Text>
-                        <Text className="w-16 text-center font-semibold">Thao tác</Text>
+                        <Text style={{ width: '25%' }} className="font-semibold">Tên món</Text>
+                        <Text style={{ width: '10%' }} className="text-center font-semibold">SL</Text>
+                        <Text style={{ width: '20%' }} className="text-right font-semibold">Đơn giá</Text>
+                        <Text style={{ width: '20%' }} className="text-right font-semibold">Tổng</Text>
+                        <Text style={{ width: '25%' }} className="text-right font-semibold">Chủ nhân</Text>
                     </View>
                     <FlatList
                         data={expense?.bills}
                         keyExtractor={(item) => item.id}
                         renderItem={renderBillItem}
                     />
-                </View>
-            )}
-
-            {/* Chủ nhân từng món */}
-            {expense?.bills && (
-                <View className="mt-4 bg-white p-4 rounded-xl shadow">
-                    <Text className="font-semibold mb-2">Chủ nhân chi phí</Text>
-                    {expense?.bills.map((bill) => (
-                        <Text key={bill.id} className="text-slate-600">
-                            {bill.name}: {bill.owner.map((o) => o.name).join(", ")}
-                        </Text>
-                    ))}
                 </View>
             )}
             <LoadingOverlay visible={loading} text="Đang tải hóa đơn..." />
