@@ -16,7 +16,6 @@ export interface Group {
 
 interface GroupsState {
   groups: Group[];
-  currentGroup: Group | null;
   selectedGroupId: string | null;
   loading: boolean;
   error: string | null;
@@ -24,7 +23,6 @@ interface GroupsState {
 
 const initialState: GroupsState = {
   groups: [],
-  currentGroup: null,
   selectedGroupId: null,
   loading: false,
   error: null,
@@ -50,6 +48,24 @@ export const createGroup = createAsyncThunk(
       body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error("Failed to create group");
+    return (await res.json()) as Group;
+  }
+);
+
+export const updateGroup = createAsyncThunk(
+  "groups/update",
+  async (body: {
+    id: string,
+    name: string,
+    users?: User[],
+    createdAt: string
+  }) => {
+    const res = await fetch(`${GROUP_SERVICE_URL}/${body.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error("Failed to update group");
     return (await res.json()) as Group;
   }
 );
@@ -106,10 +122,6 @@ const groupsSlice = createSlice({
   name: "groups",
   initialState,
   reducers: {
-    setCurrentGroup: (state, action: PayloadAction<Group | null>) => {
-      state.currentGroup = action.payload;
-      state.selectedGroupId = action.payload?.id || null;
-    },
     setSelectedGroupId: (state, action: PayloadAction<string | null>) => {
       state.selectedGroupId = action.payload;
     },
@@ -143,6 +155,23 @@ const groupsSlice = createSlice({
         state.loading = false;
         state.error = action.error.message ?? "Failed to create group";
       })
+      // update group
+      .addCase(updateGroup.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateGroup.fulfilled, (state, action: PayloadAction<Group>) => {
+        state.loading = false;
+        const updated = action.payload;
+        const index = state.groups.findIndex(g => g.id === updated.id);
+        if (index !== -1) {
+          state.groups[index] = updated;
+        }
+      })
+      .addCase(updateGroup.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to update group";
+      })
       // delete group
       .addCase(deleteGroup.pending, (state) => {
         state.loading = true;
@@ -167,7 +196,6 @@ const groupsSlice = createSlice({
         const group = Array.isArray(state.groups) ? state.groups.find(group => group.id === groupId) || null : null;
         if (group) {
           group.expenses = expenses;
-          state.currentGroup = group;
         }
       })
       .addCase(fetchExpenses.rejected, (state, action) => {
@@ -187,7 +215,6 @@ const groupsSlice = createSlice({
           const expense = group.expenses?.find(expense => expense.id === expenseId) || null;
           if (expense) {
             expense.bills = bill;
-            state.currentGroup = group;
           }
         }
       })
@@ -201,4 +228,4 @@ const groupsSlice = createSlice({
 export default groupsSlice.reducer;
 
 // selector
-export const { setCurrentGroup, setSelectedGroupId } = groupsSlice.actions;
+export const { setSelectedGroupId } = groupsSlice.actions;
