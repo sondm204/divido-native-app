@@ -70,6 +70,11 @@ const [billPrice, setBillPrice] = useState("");
                 <Text className="text-slate-900 font-bold mt-2">
                     Tổng: {formatCurrency(expense?.amount || 0 )}
                 </Text>
+                {expense?.shareRatios.map((s, index) => (
+                    <Text key={`${s.username}-${index}`}>
+                        {s.username}: {formatCurrency(s.ratio * expense?.amount)}
+                    </Text>
+                ))}
             </View>
 
             {/* Bảng chi tiết bill */}
@@ -97,18 +102,6 @@ const [billPrice, setBillPrice] = useState("");
                     {expense?.bills.map((bill) => (
                         <Text key={bill.id} className="text-slate-600">
                             {bill.name}: {bill.owner.map((o) => o.name).join(", ")}
-                        </Text>
-                    ))}
-                </View>
-            )}
-
-            {/* Tỉ lệ chia */}
-            {expense?.shareRatios && expense?.shareRatios.length > 0 && (
-                <View className="mt-4 bg-white p-4 rounded-xl shadow">
-                    <Text className="font-semibold mb-2">Tỉ lệ chia</Text>
-                    {expense?.shareRatios.map((s, idx) => (
-                        <Text key={idx} className="text-slate-600">
-                            {s.username}: {s.ratio}%
                         </Text>
                     ))}
                 </View>

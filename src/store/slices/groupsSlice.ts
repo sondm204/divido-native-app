@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 import { User } from "./userSlice";
-import { Bill, Category, Expense } from "./expensesSlice";
+import { Bill, Category, Expense, ShareRatio } from "./expensesSlice";
 import { EXPENSE_SERVICE_URL, GROUP_SERVICE_URL } from "../../commons/constants";
 
 // type cho Group
@@ -54,15 +54,31 @@ export const createGroup = createAsyncThunk(
   }
 );
 
+export const deleteGroup = createAsyncThunk(
+  "groups/delete",
+  async (groupId: string) => {
+    const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Failed to delete group");
+    return groupId;
+  }
+);
+
 export const fetchExpenses = createAsyncThunk(
   "groups/fetchExpenses",
   async (groupId: string, { rejectWithValue }) => {
     try {
       const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}/expenses`);
       const data = await res.json();
+      const expenses = data.map((expense: any) => ({
+        ...expense,
+        shareRatios: expense.shareRatios.map((s: any) => ({
+          username: s.user.name,
+          ratio: s.ratio
+        })) as ShareRatio[]
+      }));
       return {
         groupId,
-        expenses: data
+        expenses: expenses
       };
     } catch (error) {
       return rejectWithValue("Failed to fetch expenses");
@@ -114,8 +130,31 @@ const groupsSlice = createSlice({
         state.error = action.error.message ?? "Error";
       })
       // create group
+      .addCase(createGroup.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(createGroup.fulfilled, (state, action: PayloadAction<Group>) => {
+        state.loading = false;
+        // Add the new group to the list
         state.groups.push(action.payload);
+      })
+      .addCase(createGroup.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to create group";
+      })
+      // delete group
+      .addCase(deleteGroup.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteGroup.fulfilled, (state, action: PayloadAction<string>) => {
+        state.loading = false;
+        state.groups = state.groups.filter(group => group.id !== action.payload);
+      })
+      .addCase(deleteGroup.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to delete group";
       })
       // fetch expenses
       .addCase(fetchExpenses.pending, (state) => {
