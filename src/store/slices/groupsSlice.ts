@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 import { User } from "./userSlice";
 import { Bill, Category, Expense, ShareRatio } from "./expensesSlice";
-import { EXPENSE_SERVICE_URL, GROUP_SERVICE_URL } from "../../commons/constants";
+import { BILL_SERVICE_URL, EXPENSE_SERVICE_URL, GROUP_SERVICE_URL } from "../../commons/constants";
 
 // type cho Group
 export interface Group {
@@ -118,6 +118,48 @@ export const fetchBill = createAsyncThunk(
   }
 )
 
+export const createBill = createAsyncThunk(
+  "expenseEditor/createBill",
+  async (body: {
+    expenseId: string;
+    bill: Bill;
+  }) => {
+    console.log(body);
+    const res = await fetch(`${EXPENSE_SERVICE_URL}/${body.expenseId}/bill`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body.bill)
+    });
+    if (!res.ok) throw new Error("Failed to create bill");
+    const data = await res.json();
+    return {
+      expenseId: body.expenseId,
+      bill: data.data
+    }
+  }
+)
+
+export const updateBill = createAsyncThunk(
+  "expenseEditor/updateBill",
+  async (body: {
+    id: string;
+    bill: Bill;
+  }) => {
+    console.log(body);
+    const res = await fetch(`${BILL_SERVICE_URL}/${body.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body.bill)
+    });
+    if (!res.ok) throw new Error("Failed to update bill");
+    const data = await res.json();
+    return {
+      id: body.id,
+      bill: data.data
+    }
+  }
+)
+
 const groupsSlice = createSlice({
   name: "groups",
   initialState,
@@ -214,18 +256,64 @@ const groupsSlice = createSlice({
         if (group) {
           const expense = group.expenses?.find(expense => expense.id === expenseId) || null;
           if (expense) {
-            expense.bills = bill;
+            expense.bills = Array.isArray(bill) ? bill : [bill];
           }
         }
       })
       .addCase(fetchBill.rejected, (state, action) => {
         state.loading = false;
         state.error = typeof action.payload === 'string' ? action.payload : (action.error.message ?? 'Error');
+      })
+      // create bill
+      .addCase(createBill.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createBill.fulfilled, (state, action: PayloadAction<{ expenseId: string; bill: Bill }>) => {
+        state.loading = false;
+        const { expenseId, bill } = action.payload;
+        const group = Array.isArray(state.groups) ? state.groups.find(group => group.id === state.selectedGroupId) || null : null;
+        if (group) {
+          const expense = group.expenses?.find(expense => expense.id === expenseId) || null;
+          if (expense) {
+            expense.bills = [...(expense.bills || []), bill];
+          } else {
+            state.error = "Failed to create bill";
+          }
+        } else {
+          state.error = "Failed to create bill";
+        }
+      })
+      .addCase(createBill.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to create bill";
+      })
+      // update bill
+      .addCase(updateBill.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateBill.fulfilled, (state, action: PayloadAction<{ id: string; bill: Bill }>) => {
+        state.loading = false;
+        const { id, bill } = action.payload;
+        const group = Array.isArray(state.groups) ? state.groups.find(group => group.id === state.selectedGroupId) || null : null;
+        if (!group || !group.expenses) return;
+        for (const expense of group.expenses) {
+          if (!expense.bills) continue;
+          const idx = expense.bills.findIndex(b => b.id === id);
+          if (idx !== -1) {
+            expense.bills[idx] = bill;
+            break;
+          }
+        }
+      })
+      .addCase(updateBill.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to update bill";
       });
   },
 });
 
 export default groupsSlice.reducer;
 
-// selector
 export const { setSelectedGroupId } = groupsSlice.actions;
