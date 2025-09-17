@@ -1,11 +1,10 @@
-import { View, Text, FlatList, TouchableOpacity, SafeAreaView, TextInput } from "react-native";
-import { Pencil, Trash2 } from "lucide-react-native";
+import { View, Text, FlatList, TouchableOpacity, SafeAreaView, TextInput, Pressable } from "react-native";
 import type { Expense, Bill } from "../store/slices/expensesSlice"; // file chứa các interface của bạn
 import { RootStackParamList } from "../../App";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import { fetchBill } from "../store/slices/groupsSlice";
+import { deleteMultipleBills, fetchBill } from "../store/slices/groupsSlice";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store/store";
@@ -32,6 +31,7 @@ export default function ExpenseDetailScreen() {
     const [unitPrice, setUnitPrice] = useState("");
     const [owner, setOwner] = useState<User[]>([]);
     const availableOwners = groupUsers.filter(u => !owner.some(o => o.id === u.id));
+    const [selectedBillIds, setSelectedBillIds] = useState<string[]>([]);
     useEffect(() => {
         if (expense?.bills?.length === 0) {
             dispatch(fetchBill(expenseId));
@@ -40,30 +40,37 @@ export default function ExpenseDetailScreen() {
 
     function formatCurrency(value?: number) {
         const n = Number(value || 0);
-        return n.toLocaleString("vi-VN") + "đ";
+        return n.toLocaleString("vi-VN");
     }
 
     const renderBillItem = ({ item }: { item: Bill }) => (
-        <View className="flex-row items-center px-3 py-2 border-b border-slate-100">
-            <Text style={{ width: '25%' }} className="">{item.name}</Text>
-            <Text style={{ width: '10%' }} className="text-center">{item.quantity}</Text>
-            <Text style={{ width: '20%' }} className="text-right">{formatCurrency(item.unitPrice)}</Text>
-            <Text style={{ width: '20%' }} className="text-right">{formatCurrency(item.totalPrice)}</Text>
-            <Text style={{ width: '15%' }} className="text-right">{(item.owner || []).map((o) => o.name).join(", ")}</Text>
-            <TouchableOpacity
-                style={{ width: '10%' }}
-                onPress={() => {
+        <TouchableOpacity
+            onPress={() => {
+                if (selectedBillIds.length > 0) {
+                    if (selectedBillIds.includes(item.id)) {
+                        setSelectedBillIds(selectedBillIds.filter(id => id !== item.id));
+                    } else {
+                        setSelectedBillIds([...selectedBillIds, item.id]);
+                    }
+                } else {
                     setEditingBill(item);
                     setBillName(item.name);
                     setQuantity(String(item.quantity));
                     setUnitPrice(String(item.unitPrice));
                     setOwner(item.owner || []);
                     setModalVisible(true);
-                }}
-            >
-                <Pencil size={18} color="#334155" />
-            </TouchableOpacity>
-        </View>
+                }
+            }}
+            onLongPress={() => {
+                selectedBillIds.includes(item.id) ? setSelectedBillIds(selectedBillIds.filter(id => id !== item.id)) : setSelectedBillIds([...selectedBillIds, item.id]);
+            }}
+            className={`flex-row items-center px-3 py-4 border-b border-slate-100 active:bg-slate-200 ${selectedBillIds.includes(item.id) ? 'bg-slate-200' : ''}`}>
+            <Text style={{ width: '25%' }} className="">{item.name}</Text>
+            <Text style={{ width: '10%' }} className="text-center">{item.quantity}</Text>
+            <Text style={{ width: '20%' }} className="text-right">{formatCurrency(item.unitPrice)}</Text>
+            <Text style={{ width: '20%' }} className="text-right">{formatCurrency(item.totalPrice)}</Text>
+            <Text style={{ width: '25%' }} className="text-right">{(item.owner || []).map((o) => o.name).join(", ")}</Text>
+        </TouchableOpacity>
     );
 
     const resetForm = () => {
@@ -118,15 +125,33 @@ export default function ExpenseDetailScreen() {
                 </Text>
                 {expense?.shareRatios.map((s, index) => (
                     <Text key={`${s.username}-${index}`}>
-                        {s.username}: {formatCurrency(s.ratio * expense?.amount)}
+                        {s.username}: {formatCurrency(s.ratio * expense?.amount)}đ
                     </Text>
                 ))}
             </View>
 
             {/* Bảng chi tiết bill */}
-            <AppButton title="Thêm hóa đơn" onPress={openCreateModal} />
+            <AppButton className="mb-4" title="Thêm hóa đơn" onPress={openCreateModal} />
+            {selectedBillIds.length > 0 && (
+                <View className="flex-row gap-2">
+                    {selectedBillIds.length === expense?.bills?.length ? (
+                        <AppButton className="mb-4 w-1/2" title="Bỏ chọn tất cả" onPress={() => {
+                            setSelectedBillIds([]);
+                        }} />
+                    ) : (
+                        <AppButton className="mb-4 w-1/2" title="Chọn tất cả" onPress={() => {
+                            setSelectedBillIds(expense?.bills?.map(b => b.id) || []);
+                        }} />
+                    )}
+                    <AppButton className="mb-4 w-1/2" title={`Xóa hóa đơn (${selectedBillIds.length})`} variant="danger" onPress={() => {
+                        dispatch(deleteMultipleBills(selectedBillIds));
+                        setSelectedBillIds([]);
+                        dispatch(fetchBill(expenseId));
+                    }} />
+                </View>
+            )}
             {expense?.bills && expense?.bills.length > 0 && (
-                <View className="bg-white rounded-xl shadow">
+                <View className="bg-white rounded-xl shadow border border-slate-200">
                     <View className="flex-row px-3 py-2 border-b border-slate-200">
                         <Text style={{ width: '25%' }} className="font-semibold">Tên món</Text>
                         <Text style={{ width: '10%' }} className="text-center font-semibold">SL</Text>
