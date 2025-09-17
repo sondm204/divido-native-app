@@ -160,6 +160,25 @@ export const updateBill = createAsyncThunk(
   }
 )
 
+export const deleteBill = createAsyncThunk(
+  "expenseEditor/deleteBill",
+  async (billId: string) => {
+    const res = await fetch(`${BILL_SERVICE_URL}/${billId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Failed to delete bill");
+    return billId;
+  }
+)
+
+export const deleteMultipleBills = createAsyncThunk(
+  "expenseEditor/deleteMultipleBills",
+  async (billIds: string[]) => {
+    const ids = billIds.join(",");
+    const res = await fetch(`${BILL_SERVICE_URL}?ids=${ids}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Failed to delete bills");
+    return billIds;
+  }
+)
+
 const groupsSlice = createSlice({
   name: "groups",
   initialState,
