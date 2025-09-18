@@ -12,6 +12,7 @@ import { store } from "./src/store/store";
 import ExpenseDetailScreen from "./src/screens/ExpenseDetailScreen";
 import AppWrapper from "./src/components/AppWrapper";
 import { Group } from "./src/store/slices/groupsSlice";
+import LoginScreen from "./src/screens/LoginScreen";
 
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import '@/global.css';
@@ -69,6 +70,7 @@ export default function App() {
                 component={ExpenseDetailScreen}
                 options={{ title: "Chi tiêu" }}
               />
+              <Stack.Screen name="Login" component={LoginScreen} />
             </Stack.Navigator>
           </NavigationContainer>
         </AppWrapper>

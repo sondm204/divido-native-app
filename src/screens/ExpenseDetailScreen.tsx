@@ -9,17 +9,25 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store/store";
 import LoadingOverlay from "../components/LoadingOverlay";
-import { useState } from "react";
-import { Modal, TextInput, Button } from "react-native";
 import AppButton from "../components/AppButton";
 import CustomModal from "../components/CustomModal";
 import AppInput from "../components/AppInput";
 import { createBill, updateBill } from "../store/slices/groupsSlice";
 import { User } from "../store/slices/userSlice";
+import { Modal, Button } from "react-native";
+
+import {useNavigation } from "@react-navigation/native"; // ✅ thêm useNavigation
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+type ExpenseDetailScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "ExpenseDetail"
+>;
 
 type ExpenseDetailRouteProp = RouteProp<RootStackParamList, "ExpenseDetail">;
 
 export default function ExpenseDetailScreen() {
+    const navigation = useNavigation<ExpenseDetailScreenNavigationProp>();
+
     const route = useRoute<ExpenseDetailRouteProp>();
     const { expenseId } = route.params;
     const dispatch = useDispatch<AppDispatch>();
@@ -44,7 +52,7 @@ export default function ExpenseDetailScreen() {
   }
 
 const [showAddBill, setShowAddBill] = useState(false);
-const [billName, setBillName] = useState("");
+const [billName2, setBillName2] = useState("");
 const [billAmount, setBillAmount] = useState("");
 const [billPrice, setBillPrice] = useState("");
 
@@ -187,8 +195,8 @@ const [billPrice, setBillPrice] = useState("");
                     <View className="gap-3">
                         <AppInput
                             label="Tên món"
-                            value={billName}
-                            onChangeText={setBillName}
+                            value={billName2}
+                            onChangeText={setBillName2}
                             placeholder="Nhập tên món"
                         />
                         <AppInput
@@ -248,6 +256,16 @@ const [billPrice, setBillPrice] = useState("");
                 onPress={() => setShowAddBill(true)} // mở form
             >
                 <Text className="text-white text-2xl font-bold">+</Text>
+            </TouchableOpacity>
+
+            {/* login */}
+            <TouchableOpacity
+                onPress={() => navigation.navigate("Login")}
+                className="bg-[#0F6BF0] rounded-full py-4 px-10 items-center shadow-md"
+            >
+                <Text className="text-white text-lg font-semibold">
+                    Go to Login
+                </Text>
             </TouchableOpacity>
             {/* Modal Form */}
             <Modal
