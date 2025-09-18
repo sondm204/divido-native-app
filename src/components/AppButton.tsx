@@ -7,6 +7,7 @@ interface AppButtonProps {
   disabled?: boolean;
   variant?: "primary" | "secondary" | "danger";
   style?: ViewStyle;
+  className?: string;
 }
 
 export default function AppButton({
@@ -15,9 +16,10 @@ export default function AppButton({
   disabled = false,
   variant = "primary",
   style,
+  className,
 }: AppButtonProps) {
   const baseStyle =
-    "py-3 rounded-xl mt-2 items-center justify-center";
+    "py-3 rounded-xl items-center justify-center";
 
   const variantStyle =
     variant === "primary"
@@ -33,7 +35,7 @@ export default function AppButton({
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled}
-      className={`${baseStyle} ${variantStyle} ${
+      className={`${baseStyle} ${variantStyle} ${className} ${
         disabled ? "opacity-50" : ""
       }`}
       style={style}
