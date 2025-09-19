@@ -38,7 +38,7 @@ export default function App() {
           <NavigationContainer>
             <StatusBar style="dark" />
             <Stack.Navigator
-              initialRouteName="GroupsList"
+              initialRouteName="Login"
               screenOptions={{
                 headerShown: false,
                 contentStyle: {
