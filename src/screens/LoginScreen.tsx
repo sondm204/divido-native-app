@@ -63,7 +63,14 @@ export default function LoginScreen() {
                     className="border border-slate-300 rounded-xl px-4 py-3 text-base text-slate-800"
                 />
             </View>
-
+      <TouchableOpacity
+        onPress={() => navigation.navigate("ForgotPassword")}
+        className="mb-6 self-end"
+      >
+        <Text className="text-[#0F6BF0] text-sm font-medium">
+          Quên mật khẩu?
+        </Text>
+      </TouchableOpacity>
             {/* Login button */}
             <TouchableOpacity
                 onPress={handleLogin}

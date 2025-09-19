@@ -14,6 +14,8 @@ import AppWrapper from "./src/components/AppWrapper";
 import { Group } from "./src/store/slices/groupsSlice";
 import LoginScreen from "./src/screens/LoginScreen";
 import RegisterScreen from "./src/screens/RegisterScreen";
+import ForgetPasswordScreen from "./src/screens/ForgetPasswordScreen";
+
 
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import '@/global.css';
@@ -73,6 +75,7 @@ export default function App() {
               />
               <Stack.Screen name="Login" component={LoginScreen} />
               <Stack.Screen name="Register" component={RegisterScreen} />
+              <Stack.Screen name="ForgotPassword" component={ForgetPasswordScreen} />
             </Stack.Navigator>
           </NavigationContainer>
         </AppWrapper>
