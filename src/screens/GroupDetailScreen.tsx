@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import {
-  SafeAreaView,
   FlatList,
   TouchableOpacity,
   Text,
@@ -14,6 +13,8 @@ import { AppDispatch, RootState } from "../store/store";
 import { Expense } from "../store/slices/expensesSlice";
 import { fetchBill, fetchExpenses, Group } from "../store/slices/groupsSlice";
 import LoadingOverlay from "../components/LoadingOverlay";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 // ---- Types ----
 type RootStackParamList = {
