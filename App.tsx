@@ -1,8 +1,8 @@
 import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import "./global.css";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import "./global.css";
 
 import GroupsListScreen from "./src/screens/GroupListScreen";
 import GroupDetailScreen from "./src/screens/GroupDetailScreen";
@@ -19,7 +19,6 @@ import { Group } from "./src/store/slices/groupsSlice";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import "@/global.css";
 
-// ---- Types ----
 export type RootStackParamList = {
   GroupsList: undefined;
   GroupDetail: { groupId: string };
@@ -48,12 +47,16 @@ export default function App() {
     <GluestackUIProvider mode="light">
       <Provider store={store}>
         <SafeAreaProvider>
-          <AppWrapper>
-            <NavigationContainer>
+          <NavigationContainer>
+            {/* ✅ AppWrapper ở TRONG NavigationContainer nên có thể dùng useNavigation */}
+            <AppWrapper>
               <StatusBar style="dark" />
               <Stack.Navigator
                 initialRouteName="GroupsList"
-                screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#F7FAFF" } }}
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: "#F7FAFF" },
+                }}
               >
                 <Stack.Screen name="GroupsList" component={GroupsListScreen} />
                 <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
@@ -62,8 +65,8 @@ export default function App() {
                 <Stack.Screen name="ExpenseForm" component={ExpenseFormScreen} />
                 <Stack.Screen name="ExpenseDetail" component={ExpenseDetailScreen} />
               </Stack.Navigator>
-            </NavigationContainer>
-          </AppWrapper>
+            </AppWrapper>
+          </NavigationContainer>
         </SafeAreaProvider>
       </Provider>
     </GluestackUIProvider>
