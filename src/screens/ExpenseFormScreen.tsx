@@ -16,6 +16,10 @@ import AppButton from "../components/AppButton";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store/store";
 import { fetchExpenses } from "../store/slices/groupsSlice";
+import { Segment, SegmentOption } from "../components/Segment";
+import { AppChip } from "../components/AppChip";
+import { AppAvatar } from "../components/AppAvatar";
+import { AppSectionCard } from "../components/AppSectionCard";
 
 /* ============================== TYPES ============================== */
 type ID = string;
@@ -101,92 +105,27 @@ async function putUpdateExpense(expenseId: string, body: unknown) {
   return res.json();
 }
 
-/* ============================== UI MINI =========================== */
-const SectionCard: React.FC<{
-  title?: string;
-  children: React.ReactNode;
-  extra?: React.ReactNode;
-}> = ({ title, children, extra }) => (
-  <View className="bg-white rounded-2xl p-4 shadow-sm mb-4">
-    {!!title && (
-      <View className="flex-row items-center justify-between mb-3">
-        <Text className="text-base font-semibold text-slate-900">{title}</Text>
-        {extra}
-      </View>
-    )}
-    {children}
-  </View>
-);
-
-const Chip: React.FC<{
-  label: string;
-  active?: boolean;
-  onPress?: () => void;
-}> = ({ label, active, onPress }) => (
-  <TouchableOpacity
-    onPress={onPress}
-    className={`px-3 py-2 rounded-full mr-2 mb-2 ${
-      active ? "bg-[#0F6BF0]" : "bg-slate-200"
-    }`}
-  >
-    <Text className={`${active ? "text-white" : "text-slate-700"}`}>{label}</Text>
-  </TouchableOpacity>
-);
-
-const Avatar: React.FC<{
-  name: string;
-  active?: boolean;
-  onPress?: () => void;
-  small?: boolean;
-}> = ({ name, active, onPress, small = false }) => {
-  const initials = name
-    .split(" ")
-    .map((p) => p[0])
-    .filter(Boolean)
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
-  return (
-    <TouchableOpacity onPress={onPress} className="items-center mr-4 mb-2">
-      <View
-        className={`rounded-full items-center justify-center ${
-          small ? "w-10 h-10" : "w-12 h-12"
-        } ${active ? "bg-[#0F6BF0]" : "bg-slate-200"}`}
-      >
-        <Text className={`font-semibold ${active ? "text-white" : "text-slate-700"}`}>
-          {initials}
-        </Text>
-      </View>
-      <Text numberOfLines={1} className="text-xs mt-1 max-w-16 text-center text-slate-600">
-        {name}
-      </Text>
-    </TouchableOpacity>
-  );
-};
-
-const Segment: React.FC<{
-  value: SplitMode;
-  current: SplitMode;
-  onChange: (v: SplitMode) => void;
-}> = ({ current, onChange }) => (
-  <View className="bg-slate-100 rounded-xl p-1 flex-row">
-    {(["EQUAL", "RATIO", "EXACT"] as SplitMode[]).map((k) => (
-      <TouchableOpacity
-        key={k}
-        onPress={() => onChange(k)}
-        className={`px-3 py-2 rounded-lg ${current === k ? "bg-white shadow" : ""}`}
-      >
-        <Text className={`text-xs font-medium ${current === k ? "text-[#0F6BF0]" : "text-slate-600"}`}>
-          {k}
-        </Text>
-      </TouchableOpacity>
-    ))}
-  </View>
-);
-
 /* ============================== MAIN SCREEN ======================= */
 export default function ExpenseFormScreen({ navigation, route }: Props) {
+  const Segment: React.FC<{
+    value: SplitMode;
+    current: SplitMode;
+    onChange: (v: SplitMode) => void;
+  }> = ({ current, onChange }) => (
+    <View className="bg-slate-100 rounded-xl p-1 flex-row">
+      {(["EQUAL", "RATIO", "EXACT"] as SplitMode[]).map((k) => (
+        <TouchableOpacity
+          key={k}
+          onPress={() => onChange(k)}
+          className={`px-3 py-2 rounded-lg ${current === k ? "bg-white shadow" : ""}`}
+        >
+          <Text className={`text-xs font-medium ${current === k ? "text-[#0F6BF0]" : "text-slate-600"}`}>
+            {k}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
   const { mode, groupId, expenseId, initial } = route.params;
   const dispatch = useDispatch<AppDispatch>();
 
@@ -206,6 +145,11 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
   );
   const [note, setNote] = useState<string>(initial?.note ?? "");
   const [splitMode, setSplitMode] = useState<SplitMode>("EQUAL");
+  const options: SegmentOption<SplitMode>[] = [
+    { label: "Equal", value: "EQUAL" },
+    { label: "Ratio", value: "RATIO" },
+    { label: "Exact", value: "EXACT" },
+  ];
 
   // participants
   const [selected, setSelected] = useState<Record<string, boolean>>({});
@@ -336,13 +280,13 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
           <Text className="text-slate-500 mb-4">Quản lý chi tiêu nhóm • nhanh & gọn</Text>
 
           {/* Category */}
-          <SectionCard title="Danh mục">
+          <AppSectionCard title="Danh mục">
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {categories.length === 0 ? (
                 <Text className="text-slate-400">Chưa có danh mục</Text>
               ) : (
                 categories.map((c: CategoryLite) => (
-                  <Chip
+                  <AppChip
                     key={c.id}
                     label={c.name}
                     active={categoryId === c.id}
@@ -351,10 +295,10 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
                 ))
               )}
             </ScrollView>
-          </SectionCard>
+          </AppSectionCard>
 
           {/* Amount + Date + Note */}
-          <SectionCard title="Thông tin chi">
+          <AppSectionCard title="Thông tin chi">
             {/* Amount */}
             <View className="mb-3">
               <Text className="text-sm text-slate-600 mb-2">Số tiền</Text>
@@ -365,9 +309,8 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
                   value={amount}
                   onChangeText={setAmount}
                   placeholder="0"
-                  className={`bg-white rounded-2xl border p-3 pl-7 ${
-                    !amount ? "border-red-400" : "border-slate-200"
-                  }`}
+                  className={`bg-white rounded-2xl border p-3 pl-7 ${!amount ? "border-red-400" : "border-slate-200"
+                    }`}
                   placeholderTextColor="#9CA3AF"
                 />
               </View>
@@ -389,16 +332,16 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
                 placeholder="Ví dụ: bữa tối, taxi..."
               />
             </View>
-          </SectionCard>
+          </AppSectionCard>
 
           {/* Payer */}
-          <SectionCard title="Người trả">
+          <AppSectionCard title="Người trả">
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {members.length === 0 ? (
                 <Text className="text-slate-400">Chưa có thành viên</Text>
               ) : (
                 members.map((m: UserLite) => (
-                  <Avatar
+                  <AppAvatar
                     key={m.id}
                     name={m.name}
                     active={payerId === m.id}
@@ -407,10 +350,10 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
                 ))
               )}
             </ScrollView>
-          </SectionCard>
+          </AppSectionCard>
 
           {/* Participants */}
-          <SectionCard
+          <AppSectionCard
             title="Người tham gia chia"
             extra={<Text className="text-slate-500 text-xs">Đang chọn: {selectedCount}</Text>}
           >
@@ -419,7 +362,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
                 <Text className="text-slate-400">Chưa có thành viên</Text>
               ) : (
                 members.map((m: UserLite) => (
-                  <Avatar
+                  <AppAvatar
                     key={m.id}
                     name={m.name}
                     small
@@ -429,12 +372,20 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
                 ))
               )}
             </View>
-          </SectionCard>
+          </AppSectionCard>
 
           {/* Split mode + editors */}
-          <SectionCard title="Cách chia">
-            <Segment value={splitMode} current={splitMode} onChange={setSplitMode} />
-
+          <AppSectionCard title="Cách chia">
+            <Segment value={splitMode} current={splitMode} onChange={(v) => setSplitMode(v as SplitMode)} />
+            {/* <View style={{ padding: 16 }}>
+              <Segment
+                options={options}
+                current={splitMode}
+                onChange={(mode) => {
+                  setSplitMode(mode);
+                }}
+              />
+            </View> */}
             {splitMode === "RATIO" && (
               <View className="mt-4">
                 {selectedIds.map((id: string) => {
@@ -479,7 +430,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
                 })}
               </View>
             )}
-          </SectionCard>
+          </AppSectionCard>
         </ScrollView>
 
         {/* Bottom action */}

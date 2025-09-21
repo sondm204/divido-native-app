@@ -7,7 +7,6 @@ import "./global.css";
 import GroupsListScreen from "./src/screens/GroupListScreen";
 import GroupDetailScreen from "./src/screens/GroupDetailScreen";
 import GroupFormScreen from "./src/screens/GroupFormScreen";
-import AddExpenseScreen from "./src/screens/AddExpenseScreen";
 import ExpenseDetailScreen from "./src/screens/ExpenseDetailScreen";
 import ExpenseFormScreen from "./src/screens/ExpenseFormScreen";
 
@@ -61,7 +60,6 @@ export default function App() {
                 <Stack.Screen name="GroupsList" component={GroupsListScreen} />
                 <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
                 <Stack.Screen name="GroupForm" component={GroupFormScreen} />
-                <Stack.Screen name="AddExpense" component={AddExpenseScreen} />
                 <Stack.Screen name="ExpenseForm" component={ExpenseFormScreen} />
                 <Stack.Screen name="ExpenseDetail" component={ExpenseDetailScreen} />
               </Stack.Navigator>
