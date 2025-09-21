@@ -102,6 +102,81 @@ export const fetchExpenses = createAsyncThunk(
   }
 );
 
+export const fetchGroupMembers = createAsyncThunk(
+  "groups/fetchGroupMembers",
+  async (groupId: string, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}/members`);
+      if (res.ok) return await res.json();
+      
+      // Fallback to group endpoint
+      const groupRes = await fetch(`${GROUP_SERVICE_URL}/${groupId}`);
+      if (groupRes.ok) {
+        const data = await groupRes.json();
+        return data.members || data.users || [];
+      }
+      throw new Error("Failed to fetch members");
+    } catch (error) {
+      return rejectWithValue("Failed to fetch group members");
+    }
+  }
+);
+
+export const fetchGroupCategories = createAsyncThunk(
+  "groups/fetchGroupCategories",
+  async (groupId: string, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}/categories`);
+      if (res.ok) return await res.json();
+      
+      // Fallback to group endpoint
+      const groupRes = await fetch(`${GROUP_SERVICE_URL}/${groupId}`);
+      if (groupRes.ok) {
+        const data = await groupRes.json();
+        return data.categories || [];
+      }
+      throw new Error("Failed to fetch categories");
+    } catch (error) {
+      return rejectWithValue("Failed to fetch group categories");
+    }
+  }
+);
+
+
+
+
+export const postCreateExpense = createAsyncThunk(
+  "groups/postCreateExpense",
+  async ({ groupId, body }: { groupId: string; body: unknown }) => {
+    const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}/expenses`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const msg = await res.text().catch(() => "");
+      throw new Error(msg || "Fail to create expense");
+    }
+    return res.json();
+  }
+);
+
+export const putUpdateExpense = createAsyncThunk(
+  "groups/putUpdateExpense",
+  async ({ expenseId, body }: { expenseId: string; body: unknown }) => {
+    const res = await fetch(`${EXPENSE_SERVICE_URL}/${expenseId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const msg = await res.text().catch(() => "");
+      throw new Error(msg || "Fail to update expense");
+    }
+    return res.json();
+  }
+);
+
 export const fetchBill = createAsyncThunk(
   "expenseEditor/fetchBill",
   async (expenseId: string, { rejectWithValue }) => {
