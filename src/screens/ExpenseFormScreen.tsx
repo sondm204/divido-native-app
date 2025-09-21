@@ -15,17 +15,17 @@ import AppInput from "../components/AppInput";
 import AppButton from "../components/AppButton";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store/store";
-import { fetchExpenses } from "../store/slices/groupsSlice";
-import { Segment, SegmentOption } from "../components/Segment";
+import { fetchExpenses, fetchGroupCategories, fetchGroupMembers, postCreateExpense, putUpdateExpense } from "../store/slices/groupsSlice";
 import { AppChip } from "../components/AppChip";
 import { AppAvatar } from "../components/AppAvatar";
 import { AppSectionCard } from "../components/AppSectionCard";
+import { User } from "../store/slices/userSlice";
+import { Category } from "../store/slices/expensesSlice";
 
 /* ============================== TYPES ============================== */
 type ID = string;
 
-type UserLite = { id: ID; name: string; email?: string };
-type CategoryLite = { id: ID; name: string };
+// Using User and Category types from Redux slices
 
 type SplitMode = "EQUAL" | "RATIO" | "EXACT";
 
@@ -51,61 +51,33 @@ type Props = {
 /* ============================== API RAW ============================ */
 const BASE_URL = "https://divido-be.onrender.com";
 
-// Thành viên nhóm (fallback sang GET /groups/:id nếu không có /members)
-async function fetchGroupMembers(groupId: string): Promise<UserLite[]> {
-  const a = await fetch(`${BASE_URL}/groups/${groupId}/members`);
-  if (a.ok) return a.json();
-
-  const b = await fetch(`${BASE_URL}/groups/${groupId}`);
-  if (b.ok) {
-    const data = await b.json();
-    if (Array.isArray(data.members)) return data.members;
-    if (Array.isArray(data.users)) return data.users;
-  }
-  throw new Error("Failed to fetch members");
-}
-
-// Danh mục
-async function fetchGroupCategories(groupId: string): Promise<CategoryLite[]> {
-  const a = await fetch(`${BASE_URL}/groups/${groupId}/categories`);
-  if (a.ok) return a.json();
-
-  const b = await fetch(`${BASE_URL}/groups/${groupId}`);
-  if (b.ok) {
-    const data = await b.json();
-    if (Array.isArray(data.categories)) return data.categories;
-  }
-  throw new Error("Failed to fetch categories");
-}
-
 // Tạo / Cập nhật expense
-async function postCreateExpense(groupId: string, body: unknown) {
-  const res = await fetch(`${BASE_URL}/groups/${groupId}/expenses`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const msg = await res.text().catch(() => "");
-    throw new Error(msg || "Fail to create expense");
-  }
-  return res.json();
-}
+// async function postCreateExpense(groupId: string, body: unknown) {
+//   const res = await fetch(`${BASE_URL}/groups/${groupId}/expenses`, {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify(body),
+//   });
+//   if (!res.ok) {
+//     const msg = await res.text().catch(() => "");
+//     throw new Error(msg || "Fail to create expense");
+//   }
+//   return res.json();
+// }
 
-async function putUpdateExpense(expenseId: string, body: unknown) {
-  const res = await fetch(`${BASE_URL}/expenses/${expenseId}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const msg = await res.text().catch(() => "");
-    throw new Error(msg || "Fail to update expense");
-  }
-  return res.json();
-}
+// async function putUpdateExpense(expenseId: string, body: unknown) {
+//   const res = await fetch(`${BASE_URL}/expenses/${expenseId}`, {
+//     method: "PUT",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify(body),
+//   });
+//   if (!res.ok) {
+//     const msg = await res.text().catch(() => "");
+//     throw new Error(msg || "Fail to update expense");
+//   }
+//   return res.json();
+// }
 
-/* ============================== MAIN SCREEN ======================= */
 export default function ExpenseFormScreen({ navigation, route }: Props) {
   const Segment: React.FC<{
     value: SplitMode;
@@ -130,8 +102,8 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
   const dispatch = useDispatch<AppDispatch>();
 
   // data
-  const [members, setMembers] = useState<UserLite[]>([]);
-  const [categories, setCategories] = useState<CategoryLite[]>([]);
+  const [members, setMembers] = useState<User[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
 
   // form state
@@ -145,11 +117,6 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
   );
   const [note, setNote] = useState<string>(initial?.note ?? "");
   const [splitMode, setSplitMode] = useState<SplitMode>("EQUAL");
-  const options: SegmentOption<SplitMode>[] = [
-    { label: "Equal", value: "EQUAL" },
-    { label: "Ratio", value: "RATIO" },
-    { label: "Exact", value: "EXACT" },
-  ];
 
   // participants
   const [selected, setSelected] = useState<Record<string, boolean>>({});
@@ -160,16 +127,16 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
   useEffect(() => {
     (async () => {
       try {
-        const [ms, cs]: [UserLite[], CategoryLite[]] = await Promise.all([
-          fetchGroupMembers(groupId),
-          fetchGroupCategories(groupId),
+        const [ms, cs]: [User[], Category[]] = await Promise.all([
+          dispatch(fetchGroupMembers(groupId)).unwrap(),
+          dispatch(fetchGroupCategories(groupId)).unwrap(),
         ]);
         setMembers(ms);
         setCategories(cs);
 
         // chọn tất cả mặc định
         const sel: Record<string, boolean> = {};
-        ms.forEach((m: UserLite) => {
+        ms.forEach((m: User) => {
           sel[m.id] = true;
         });
         setSelected(sel);
@@ -177,7 +144,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
         // nếu đang sửa ⇒ map lại selected & ratio
         if (initial?.shareRatios?.length) {
           const s2: Record<string, boolean> = {};
-          ms.forEach((m: UserLite) => (s2[m.id] = false));
+          ms.forEach((m: User) => (s2[m.id] = false));
           initial.shareRatios.forEach((r) => (s2[r.userId] = true));
           setSelected(s2);
 
@@ -192,7 +159,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
   }, [groupId, initial?.shareRatios]);
 
   const selectedIds = useMemo<string[]>(
-    () => members.filter((m: UserLite) => selected[m.id]).map((m: UserLite) => m.id),
+    () => members.filter((m: User) => selected[m.id]).map((m: User) => m.id),
     [members, selected]
   );
 
@@ -253,8 +220,8 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
 
     try {
       setLoading(true);
-      if (mode === "create") await postCreateExpense(groupId, payload);
-      else await putUpdateExpense(expenseId as string, payload);
+        if (mode === "create") await dispatch(postCreateExpense({ groupId, body: payload })).unwrap();
+        else await dispatch(putUpdateExpense({ expenseId: expenseId as string, body: payload })).unwrap();
 
       await dispatch(fetchExpenses(groupId));
       setLoading(false);
@@ -282,10 +249,10 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
           {/* Category */}
           <AppSectionCard title="Danh mục">
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {categories.length === 0 ? (
-                <Text className="text-slate-400">Chưa có danh mục</Text>
-              ) : (
-                categories.map((c: CategoryLite) => (
+                {categories.length === 0 ? (
+                  <Text className="text-slate-400">Chưa có danh mục</Text>
+                ) : (
+                  categories.map((c: Category) => (
                   <AppChip
                     key={c.id}
                     label={c.name}
@@ -340,7 +307,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
               {members.length === 0 ? (
                 <Text className="text-slate-400">Chưa có thành viên</Text>
               ) : (
-                members.map((m: UserLite) => (
+                members.map((m: User) => (
                   <AppAvatar
                     key={m.id}
                     name={m.name}
@@ -361,7 +328,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
               {members.length === 0 ? (
                 <Text className="text-slate-400">Chưa có thành viên</Text>
               ) : (
-                members.map((m: UserLite) => (
+                members.map((m: User) => (
                   <AppAvatar
                     key={m.id}
                     name={m.name}
@@ -377,15 +344,6 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
           {/* Split mode + editors */}
           <AppSectionCard title="Cách chia">
             <Segment value={splitMode} current={splitMode} onChange={(v) => setSplitMode(v as SplitMode)} />
-            {/* <View style={{ padding: 16 }}>
-              <Segment
-                options={options}
-                current={splitMode}
-                onChange={(mode) => {
-                  setSplitMode(mode);
-                }}
-              />
-            </View> */}
             {splitMode === "RATIO" && (
               <View className="mt-4">
                 {selectedIds.map((id: string) => {
