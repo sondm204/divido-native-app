@@ -1,4 +1,5 @@
-import { View, Text, FlatList, TouchableOpacity, SafeAreaView, TextInput, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, FlatList, TouchableOpacity, TextInput, Pressable } from "react-native";
 import type { Expense, Bill } from "../store/slices/expensesSlice"; // file chứa các interface của bạn
 import { RootStackParamList } from "../../App";
 import { RouteProp, useRoute } from "@react-navigation/native";
@@ -14,6 +15,7 @@ import CustomModal from "../components/CustomModal";
 import AppInput from "../components/AppInput";
 import { createBill, updateBill } from "../store/slices/groupsSlice";
 import { User } from "../store/slices/userSlice";
+
 
 type ExpenseDetailRouteProp = RouteProp<RootStackParamList, "ExpenseDetail">;
 

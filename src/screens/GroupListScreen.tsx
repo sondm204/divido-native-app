@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import {
-    SafeAreaView,
     FlatList,
     TouchableOpacity,
     Text,
@@ -14,6 +13,8 @@ import { AppDispatch, RootState } from "../store/store";
 import LoadingOverlay from "../components/LoadingOverlay";
 import { Trash2, Trash } from "lucide-react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 // ---- Types ----
 type RootStackParamList = {
