@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -11,6 +11,7 @@ import AppButton from "../components/AppButton";
 import { Group, createGroup, fetchGroups, updateGroup } from "../store/slices/groupsSlice";
 import { User } from "../store/slices/userSlice";
 import { getUserByEmail } from "../store/slices/userSlice";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type GroupFormRouteProp = RouteProp<RootStackParamList, "GroupForm">;
 

@@ -1,4 +1,5 @@
-import { View, Text, FlatList, TouchableOpacity, SafeAreaView, TextInput, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, FlatList, TouchableOpacity, TextInput, Pressable } from "react-native";
 import type { Expense, Bill } from "../store/slices/expensesSlice"; // file chứa các interface của bạn
 import { RootStackParamList } from "../../App";
 import { RouteProp, useRoute } from "@react-navigation/native";
@@ -22,6 +23,7 @@ type ExpenseDetailScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "ExpenseDetail"
 >;
+
 
 type ExpenseDetailRouteProp = RouteProp<RootStackParamList, "ExpenseDetail">;
 

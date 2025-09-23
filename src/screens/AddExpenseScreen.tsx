@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../App";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 type AddExpenseRouteProp = RouteProp<RootStackParamList, "AddExpense">;
 
