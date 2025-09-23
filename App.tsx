@@ -55,7 +55,7 @@ export default function App() {
             <AppWrapper>
               <StatusBar style="dark" />
               <Stack.Navigator
-                initialRouteName="GroupsList"
+                initialRouteName="Login"
                 screenOptions={{
                   headerShown: false,
                   contentStyle: { backgroundColor: "#F7FAFF" },
