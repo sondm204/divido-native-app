@@ -8,6 +8,9 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useDispatch, useSelector } from "react-redux";
+import { register } from "../store/slices/authSlice"; // đường dẫn tới slice
+import type { RootState, AppDispatch } from "../redux/store";
 
 type RootStackParamList = {
     Login: undefined;
@@ -23,17 +26,22 @@ export default function RegisterScreen() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+const dispatch = useDispatch<AppDispatch>();
 
-    function handleRegister() {
+  async function handleRegister() {
         if (!name || !email || !password || !confirmPassword) {
             alert("Vui lòng nhập đầy đủ thông tin");
+            return reject;
+        }
+        if (!email.endsWith("@gmail.com")) {
+            alert("Email phải kết thúc bằng @gmail.com");
             return;
         }
         if (password !== confirmPassword) {
             alert("Mật khẩu nhập lại không khớp");
             return;
         }
-        // TODO: call API hoặc dispatch register action
+        const resultAction = await dispatch(register({ name, email, password }));
         console.log("Register with:", name, email, password);
 
         // Sau khi đăng ký thành công -> quay về Login

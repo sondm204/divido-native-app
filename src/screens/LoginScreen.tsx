@@ -8,7 +8,9 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../store/slices/authSlice"; // đường dẫn tới slice
+import type { RootState, AppDispatch } from "../redux/store"; // nếu bạn đã cấu hình store
 
 type RootStackParamList = {
     Login: undefined;
@@ -19,15 +21,26 @@ type RootStackParamList = {
 export default function LoginScreen() {
     const navigation =
         useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
+const dispatch = useDispatch<AppDispatch>();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    function handleLogin() {
-        // TODO: call API hoặc dispatch login action
-        console.log("Login with:", email, password);
-        navigation.replace("GroupsList"); // Sau khi login thành công -> vào màn GroupsList
+async function handleLogin() {
+  try {
+    const resultAction = await dispatch(login({ email, password }));
+
+    if (login.fulfilled.match(resultAction)) {
+      // Login thành công
+      navigation.replace("GroupsList");
+    } else {
+      // Login thất bại, có thể lấy lỗi
+      const errorMsg = resultAction.payload || "Login failed MESS";
+      alert(errorMsg);
     }
+  } catch (err) {
+    console.log(err);
+  }
+}
 
     return (
         <SafeAreaView className="flex-1 px-6 justify-center bg-white">
