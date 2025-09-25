@@ -3,16 +3,18 @@ import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
-import { RootStackParamList } from "../../App";
+import type { RootStackParamList } from "../../App";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-
-type AddExpenseRouteProp = RouteProp<RootStackParamList, "AddExpense">;
+type AddExpenseRouteProp = RouteProp<
+  RootStackParamList,
+  keyof RootStackParamList
+>;
 
 export default function AddExpenseScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<AddExpenseRouteProp>();
-  const { groupId } = route.params;
 
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
