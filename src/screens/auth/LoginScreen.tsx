@@ -1,46 +1,47 @@
 import React, { useState } from "react";
 import {
-    SafeAreaView,
     Text,
     TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../store/slices/authSlice"; // đường dẫn tới slice
-import type { RootState, AppDispatch } from "../redux/store"; // nếu bạn đã cấu hình store
+import { login } from "../../store/slices/authSlice";
+import { AppDispatch, RootState } from "../../store/store";
 
 type RootStackParamList = {
     Login: undefined;
     GroupsList: undefined;
-    Register: undefined;
+    Email: undefined;
+    ForgotPassword: undefined;
 };
 
 export default function LoginScreen() {
     const navigation =
         useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-const dispatch = useDispatch<AppDispatch>();
+    const dispatch = useDispatch<AppDispatch>();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-async function handleLogin() {
-  try {
-    const resultAction = await dispatch(login({ email, password }));
+    async function handleLogin() {
+        try {
+            const resultAction = await dispatch(login({ email, password }));
 
-    if (login.fulfilled.match(resultAction)) {
-      // Login thành công
-      navigation.replace("GroupsList");
-    } else {
-      // Login thất bại, có thể lấy lỗi
-      const errorMsg = resultAction.payload || "Login failed MESS";
-      alert(errorMsg);
+            if (login.fulfilled.match(resultAction)) {
+                // Login thành công
+                navigation.replace("GroupsList");
+            } else {
+                // Login thất bại, có thể lấy lỗi
+                const errorMsg = resultAction.payload || "Login failed MESS";
+                alert(errorMsg);
+            }
+        } catch (err) {
+            console.log(err);
+        }
     }
-  } catch (err) {
-    console.log(err);
-  }
-}
 
     return (
         <SafeAreaView className="flex-1 px-6 justify-center bg-white">
@@ -76,14 +77,14 @@ async function handleLogin() {
                     className="border border-slate-300 rounded-xl px-4 py-3 text-base text-slate-800"
                 />
             </View>
-      <TouchableOpacity
-        onPress={() => navigation.navigate("ForgotPassword")}
-        className="mb-6 self-end"
-      >
-        <Text className="text-[#0F6BF0] text-sm font-medium">
-          Quên mật khẩu?
-        </Text>
-      </TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => navigation.navigate("ForgotPassword")}
+                className="mb-6 self-end"
+            >
+                <Text className="text-[#0F6BF0] text-sm font-medium">
+                    Quên mật khẩu?
+                </Text>
+            </TouchableOpacity>
             {/* Login button */}
             <TouchableOpacity
                 onPress={handleLogin}
@@ -99,7 +100,7 @@ async function handleLogin() {
                 <Text className="text-slate-600 text-base">
                     Chưa có tài khoản?{" "}
                 </Text>
-                <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+                <TouchableOpacity onPress={() => navigation.navigate("Email")}>
                     <Text className="text-[#0F6BF0] font-medium text-base">
                         Đăng ký
                     </Text>

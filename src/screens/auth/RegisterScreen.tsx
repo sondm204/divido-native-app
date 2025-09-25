@@ -1,37 +1,39 @@
 import React, { useState } from "react";
 import {
-    SafeAreaView,
     Text,
     TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDispatch, useSelector } from "react-redux";
-import { register } from "../store/slices/authSlice"; // đường dẫn tới slice
-import type { RootState, AppDispatch } from "../redux/store";
+import { register } from "../../store/slices/authSlice";
+import { AppDispatch, RootState } from "../../store/store";
 
 type RootStackParamList = {
     Login: undefined;
     GroupsList: undefined;
-    Register: undefined;
+    Register: { email: string; verificationToken: string };
 };
+
+type RegisterRouteProp = RouteProp<RootStackParamList, "Register">;
 
 export default function RegisterScreen() {
     const navigation =
         useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
+    const route = useRoute<RegisterRouteProp>();
+    const { email, verificationToken } = route.params;
     const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-const dispatch = useDispatch<AppDispatch>();
+    const dispatch = useDispatch<AppDispatch>();
 
-  async function handleRegister() {
+    async function handleRegister() {
         if (!name || !email || !password || !confirmPassword) {
             alert("Vui lòng nhập đầy đủ thông tin");
-            return reject;
+            return;
         }
         if (!email.endsWith("@gmail.com")) {
             alert("Email phải kết thúc bằng @gmail.com");
@@ -41,10 +43,7 @@ const dispatch = useDispatch<AppDispatch>();
             alert("Mật khẩu nhập lại không khớp");
             return;
         }
-        const resultAction = await dispatch(register({ name, email, password }));
-        console.log("Register with:", name, email, password);
-
-        // Sau khi đăng ký thành công -> quay về Login
+        const resultAction = await dispatch(register({ name, email, password, verificationToken }));
         navigation.replace("Login");
     }
 
@@ -64,20 +63,6 @@ const dispatch = useDispatch<AppDispatch>();
                     value={name}
                     onChangeText={setName}
                     placeholder="Nhập họ và tên"
-                    className="border border-slate-300 rounded-xl px-4 py-3 text-base text-slate-800"
-                />
-            </View>
-
-            {/* Email input */}
-            <View className="mb-4">
-                <Text className="text-sm font-medium text-slate-600 mb-1">
-                    Email
-                </Text>
-                <TextInput
-                    value={email}
-                    onChangeText={setEmail}
-                    placeholder="Nhập email"
-                    keyboardType="email-address"
                     className="border border-slate-300 rounded-xl px-4 py-3 text-base text-slate-800"
                 />
             </View>

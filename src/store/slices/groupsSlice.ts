@@ -3,6 +3,8 @@ import type { RootState } from "../store";
 import { User } from "./userSlice";
 import { Bill, Category, Expense, ShareRatio } from "./expensesSlice";
 import { BILL_SERVICE_URL, EXPENSE_SERVICE_URL, GROUP_SERVICE_URL } from "../../commons/constants";
+import { getToken } from "@/src/utils/utils";
+import { request } from "@/src/utils/callApi";
 
 // type cho Group
 export interface Group {
@@ -30,9 +32,12 @@ const initialState: GroupsState = {
 
 // thunk gọi API
 export const fetchGroups = createAsyncThunk("groups/fetch", async () => {
-  const res = await fetch(GROUP_SERVICE_URL);
-  if (!res.ok) throw new Error("Failed to fetch groups");
-  return (await res.json()) as Group[];
+  const response = await request({
+    url: GROUP_SERVICE_URL,
+    method: "GET",
+  });
+  if (response.status !== 200) throw new Error("Failed to fetch groups");
+  return (await response.data) as Group[];
 });
 
 export const createGroup = createAsyncThunk(

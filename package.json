@@ -20,6 +20,7 @@
     "babel-preset-expo": "^54.0.1",
     "class-variance-authority": "^0.7.1",
     "expo": "^54.0.9",
+    "expo-secure-store": "^15.0.7",
     "expo-status-bar": "~3.0.8",
     "lucide-react": "^0.542.0",
     "lucide-react-native": "^0.542.0",
