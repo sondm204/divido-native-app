@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
+import { BILL_SERVICE_URL } from "@/src/commons/constants";
 
 export interface Bill {
   id: string;

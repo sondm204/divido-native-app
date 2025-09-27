@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AUTH_SERVER_URL } from "../../commons/constants";
 import { storeToken } from "@/src/utils/utils";
+import { request } from "@/src/utils/callApi";
 
 // Kiểu dữ liệu user
 export interface User {
@@ -38,18 +39,18 @@ export const login = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await fetch(`${AUTH_SERVER_URL}/login`, {
+      const response = await request({
+        url: `${AUTH_SERVER_URL}/login`,
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
+        data: params,
         credentials: "include",
       });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Login failed");
       }
 
-      const data = await response.json();
+      const data = await response.data as any;
       return data.data as LoginResponse;
     } catch (error) {
       return rejectWithValue("Failed to login:" + error);
@@ -61,15 +62,15 @@ export const emailVerification = createAsyncThunk(
   "emailVerification",
   async (params: { email: string }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${AUTH_SERVER_URL}/email-verification`, {
+      const response = await request({
+        url: `${AUTH_SERVER_URL}/email-verification`,
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
+        data: params,
       });
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Email verification failed");
       }
-      return response.json();
+      return response.data as any;
     } catch (error) {
       return rejectWithValue("Failed to email verification:" + error);
     }
@@ -80,15 +81,15 @@ export const verifyEmail = createAsyncThunk(
   "verifyEmail",
   async (params: { email: string; code: string }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${AUTH_SERVER_URL}/verify-email`, {
+      const response = await request({
+        url: `${AUTH_SERVER_URL}/verify-email`,
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
+        data: params,
       });
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Verify email failed");
       }
-      return response.json();
+      return response.data as any;
     } catch (error) {
       return rejectWithValue("Failed to verify code:" + error);
     }
@@ -103,17 +104,17 @@ export const register = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await fetch(`${AUTH_SERVER_URL}/register`, {
+      const response = await request({
+        url: `${AUTH_SERVER_URL}/register`,
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
+        data: params,
       });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Register failed");
       }
 
-      const data = await response.json();
+      const data = await response.data as any;
       return data.user; // chỉ lấy user
     } catch (error) {
       return rejectWithValue("Failed to register");

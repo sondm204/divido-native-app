@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { USER_SERVICE_URL } from "../../commons/constants";
+import { request } from "@/src/utils/callApi";
 
 export interface User {
     id: string;
@@ -37,8 +38,11 @@ export const fetchCurrentUser = createAsyncThunk(
     "userEditor/fetchCurrentUser",
     async (userId: string, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${USER_SERVICE_URL}/${userId}`);
-            const data = await response.json();
+            const response = await request({
+                url: `${USER_SERVICE_URL}/${userId}`,
+                method: 'GET',
+            });
+            const data = await response.data as any;
             return data;
         } catch (error) {
             return rejectWithValue("Failed to fetch user");
@@ -49,14 +53,11 @@ export const fetchCurrentUser = createAsyncThunk(
 export const getUserByEmail = async (params: { email: string }) => {
     const endpoint = `${USER_SERVICE_URL}/email/${params.email}`;
 
-    const response = await fetch(endpoint, {
+    const response = await request({
+        url: endpoint,
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
     });
-
-    const data = await response.json();
+    const data = await response.data as any;
     return data;
 }
 

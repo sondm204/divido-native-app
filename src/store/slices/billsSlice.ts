@@ -1,5 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
+import { BILL_SERVICE_URL } from "@/src/commons/constants";
+import { request } from "@/src/utils/callApi";
 
 export interface Bill {
   id: string;
@@ -44,21 +46,21 @@ export const createBill = createAsyncThunk(
     quantity: number;
     unitPrice: number;
   }) => {
-    const res = await fetch(BILL_SERVICE_URL, {
+    const response = await request({
+      url: BILL_SERVICE_URL,
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+      data: {
         name: body.name,
         quantity: body.quantity,
         unitPrice: body.unitPrice,
         expense: { id: body.expenseId }, //
-      }),
+      },
     });
 
-    if (!res.ok) throw new Error("Failed to create Bill");
+    if (response.status !== 200) throw new Error("Failed to create Bill");
 
     // vì backend trả về ApiResponse<BillDTO>
-    const apiResponse = await res.json();
+    const apiResponse = await response.data as any;
 
     return apiResponse.data as Bill; // 👈 data chính là BillDTO
   }
