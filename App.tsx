@@ -14,9 +14,15 @@ import { Provider } from "react-redux";
 import { store } from "./src/store/store";
 import AppWrapper from "./src/components/AppWrapper";
 import { Group } from "./src/store/slices/groupsSlice";
+import LoginScreen from "./src/screens/auth/LoginScreen";
+import RegisterScreen from "./src/screens/auth/RegisterScreen";
+import ForgetPasswordScreen from "./src/screens/auth/ForgetPasswordScreen";
+
 
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import "@/global.css";
+import VerifyCodeScreen from "./src/screens/auth/VerifyCodeScreen";
+import EmailScreen from "./src/screens/auth/EmailScreen";
 
 export type RootStackParamList = {
   GroupsList: undefined;
@@ -37,6 +43,11 @@ export type RootStackParamList = {
       shareRatios: { userId: string; ratio: number }[];
     };
   };
+  Login: undefined;
+  ForgotPassword: undefined;
+  VerifyCode: { email: string };
+  Register: { email: string; verificationToken: string };
+  Email: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -51,7 +62,7 @@ export default function App() {
             <AppWrapper>
               <StatusBar style="dark" />
               <Stack.Navigator
-                initialRouteName="GroupsList"
+                initialRouteName="Login"
                 screenOptions={{
                   headerShown: false,
                   contentStyle: { backgroundColor: "#F7FAFF" },
@@ -62,6 +73,11 @@ export default function App() {
                 <Stack.Screen name="GroupForm" component={GroupFormScreen} />
                 <Stack.Screen name="ExpenseForm" component={ExpenseFormScreen} />
                 <Stack.Screen name="ExpenseDetail" component={ExpenseDetailScreen} />
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="VerifyCode" component={VerifyCodeScreen} />
+                <Stack.Screen name="Email" component={EmailScreen} />
+                <Stack.Screen name="Register" component={RegisterScreen} />
+                <Stack.Screen name="ForgotPassword" component={ForgetPasswordScreen} />
               </Stack.Navigator>
             </AppWrapper>
           </NavigationContainer>

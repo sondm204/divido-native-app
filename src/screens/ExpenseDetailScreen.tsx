@@ -15,11 +15,21 @@ import CustomModal from "../components/CustomModal";
 import AppInput from "../components/AppInput";
 import { createBill, updateBill } from "../store/slices/groupsSlice";
 import { User } from "../store/slices/userSlice";
+import { Modal, Button } from "react-native";
+
+import {useNavigation } from "@react-navigation/native"; // ✅ thêm useNavigation
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+type ExpenseDetailScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "ExpenseDetail"
+>;
 
 
 type ExpenseDetailRouteProp = RouteProp<RootStackParamList, "ExpenseDetail">;
 
 export default function ExpenseDetailScreen() {
+    const navigation = useNavigation<ExpenseDetailScreenNavigationProp>();
+
     const route = useRoute<ExpenseDetailRouteProp>();
     const { expenseId } = route.params;
     const dispatch = useDispatch<AppDispatch>();
@@ -39,6 +49,14 @@ export default function ExpenseDetailScreen() {
             dispatch(fetchBill(expenseId));
         }
     }, [expenseId]);
+ function handleCreate() {
+    navigation.reload();
+  }
+
+const [showAddBill, setShowAddBill] = useState(false);
+const [billName2, setBillName2] = useState("");
+const [billAmount, setBillAmount] = useState("");
+const [billPrice, setBillPrice] = useState("");
 
     function formatCurrency(value?: number) {
         const n = Number(value || 0);
@@ -179,8 +197,8 @@ export default function ExpenseDetailScreen() {
                     <View className="gap-3">
                         <AppInput
                             label="Tên món"
-                            value={billName}
-                            onChangeText={setBillName}
+                            value={billName2}
+                            onChangeText={setBillName2}
                             placeholder="Nhập tên món"
                         />
                         <AppInput

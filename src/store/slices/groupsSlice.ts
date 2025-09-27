@@ -3,6 +3,8 @@ import type { RootState } from "../store";
 import { User } from "./userSlice";
 import { Bill, Category, Expense, ShareRatio } from "./expensesSlice";
 import { BILL_SERVICE_URL, EXPENSE_SERVICE_URL, GROUP_SERVICE_URL } from "../../commons/constants";
+import { getToken } from "@/src/utils/utils";
+import { request } from "@/src/utils/callApi";
 
 // type cho Group
 export interface Group {
@@ -30,9 +32,12 @@ const initialState: GroupsState = {
 
 // thunk gọi API
 export const fetchGroups = createAsyncThunk("groups/fetch", async () => {
-  const res = await fetch(GROUP_SERVICE_URL);
-  if (!res.ok) throw new Error("Failed to fetch groups");
-  return (await res.json()) as Group[];
+  const response = await request({
+    url: GROUP_SERVICE_URL,
+    method: "GET",
+  });
+  if (response.status !== 200) throw new Error("Failed to fetch groups");
+  return (await response.data) as Group[];
 });
 
 export const createGroup = createAsyncThunk(
@@ -42,13 +47,13 @@ export const createGroup = createAsyncThunk(
     users?: User[],
     createdAt: string
   }) => {
-    const res = await fetch(GROUP_SERVICE_URL, {
+    const response = await request({
+      url: GROUP_SERVICE_URL,
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      data: body,
     });
-    if (!res.ok) throw new Error("Failed to create group");
-    return (await res.json()) as Group;
+    if (response.status !== 200) throw new Error("Failed to create group");
+    return (await response.data) as Group;
   }
 );
 
@@ -60,21 +65,24 @@ export const updateGroup = createAsyncThunk(
     users?: User[],
     createdAt: string
   }) => {
-    const res = await fetch(`${GROUP_SERVICE_URL}/${body.id}`, {
+    const response = await request({
+      url: `${GROUP_SERVICE_URL}/${body.id}`,
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
+      data: body,
     });
-    if (!res.ok) throw new Error("Failed to update group");
-    return (await res.json()) as Group;
+    if (response.status !== 200) throw new Error("Failed to update group");
+    return (await response.data) as Group;
   }
 );
 
 export const deleteGroup = createAsyncThunk(
   "groups/delete",
   async (groupId: string) => {
-    const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}`, { method: "DELETE" });
-    if (!res.ok) throw new Error("Failed to delete group");
+    const response = await request({
+      url: `${GROUP_SERVICE_URL}/${groupId}`,
+      method: "DELETE",
+    });
+    if (response.status !== 200) throw new Error("Failed to delete group");
     return groupId;
   }
 );
@@ -83,9 +91,12 @@ export const fetchExpenses = createAsyncThunk(
   "groups/fetchExpenses",
   async (groupId: string, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}/expenses`);
-      const data = await res.json();
-      const expenses = data.map((expense: any) => ({
+      const response = await request({
+        url: `${GROUP_SERVICE_URL}/${groupId}/expenses`,
+        method: "GET",
+      });
+      const data = await response.data as Expense[];
+      const expenses = data.map((expense: Expense) => ({
         ...expense,
         shareRatios: expense.shareRatios.map((s: any) => ({
           username: s.user.name,
@@ -106,13 +117,25 @@ export const fetchGroupMembers = createAsyncThunk(
   "groups/fetchGroupMembers",
   async (groupId: string, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}/members`);
-      if (res.ok) return await res.json();
+      // Try the specific users endpoint first
+      try {
+        const response = await request({
+          url: `${GROUP_SERVICE_URL}/${groupId}/users`,
+          method: "GET",
+        });
+        if (response.status === 200) return await response.data;
+      } catch (error) {
+        // If users endpoint fails, try fallback to group endpoint
+        console.log("Users endpoint failed, trying group endpoint:", error);
+      }
       
       // Fallback to group endpoint
-      const groupRes = await fetch(`${GROUP_SERVICE_URL}/${groupId}`);
-      if (groupRes.ok) {
-        const data = await groupRes.json();
+      const groupRes = await request({
+        url: `${GROUP_SERVICE_URL}/${groupId}`,
+        method: "GET",
+      });
+      if (groupRes.status === 200) {
+        const data = await groupRes.data as any;
         return data.members || data.users || [];
       }
       throw new Error("Failed to fetch members");
@@ -126,13 +149,25 @@ export const fetchGroupCategories = createAsyncThunk(
   "groups/fetchGroupCategories",
   async (groupId: string, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}/categories`);
-      if (res.ok) return await res.json();
+      // Try the specific categories endpoint first
+      try {
+        const res = await request({
+          url: `${GROUP_SERVICE_URL}/${groupId}/categories`,
+          method: "GET",
+        });
+        if (res.status === 200) return await res.data;
+      } catch (error) {
+        // If categories endpoint fails, try fallback to group endpoint
+        console.log("Categories endpoint failed, trying group endpoint:", error);
+      }
       
       // Fallback to group endpoint
-      const groupRes = await fetch(`${GROUP_SERVICE_URL}/${groupId}`);
-      if (groupRes.ok) {
-        const data = await groupRes.json();
+      const groupRes = await request({
+        url: `${GROUP_SERVICE_URL}/${groupId}`,
+        method: "GET",
+      });
+      if (groupRes.status === 200) {
+        const data = await groupRes.data as any;
         return data.categories || [];
       }
       throw new Error("Failed to fetch categories");
@@ -148,32 +183,33 @@ export const fetchGroupCategories = createAsyncThunk(
 export const postCreateExpense = createAsyncThunk(
   "groups/postCreateExpense",
   async ({ groupId, body }: { groupId: string; body: unknown }) => {
-    const res = await fetch(`${GROUP_SERVICE_URL}/${groupId}/expenses`, {
+    console.log("body", body);
+    const response = await request({
+      url: `${GROUP_SERVICE_URL}/${groupId}/expenses`,
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      data: body,
     });
-    if (!res.ok) {
-      const msg = await res.text().catch(() => "");
+    if (response.status !== 200) {
+      const msg = await response.data as any;
       throw new Error(msg || "Fail to create expense");
     }
-    return res.json();
+    return response.data;
   }
 );
 
 export const putUpdateExpense = createAsyncThunk(
   "groups/putUpdateExpense",
   async ({ expenseId, body }: { expenseId: string; body: unknown }) => {
-    const res = await fetch(`${EXPENSE_SERVICE_URL}/${expenseId}`, {
+    const response = await request({
+      url: `${EXPENSE_SERVICE_URL}/${expenseId}`,
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      data: body,
     });
-    if (!res.ok) {
-      const msg = await res.text().catch(() => "");
+    if (response.status !== 200) {
+      const msg = await response.data as any;
       throw new Error(msg || "Fail to update expense");
     }
-    return res.json();
+    return response.data;
   }
 );
 
@@ -181,8 +217,11 @@ export const fetchBill = createAsyncThunk(
   "expenseEditor/fetchBill",
   async (expenseId: string, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${EXPENSE_SERVICE_URL}/${expenseId}/bill`);
-      const data = await response.json();
+      const response = await request({
+        url: `${EXPENSE_SERVICE_URL}/${expenseId}/bill`,
+        method: "GET",
+      });
+      const data = await response.data as any;
       return {
         expenseId,
         bill: data
@@ -200,13 +239,13 @@ export const createBill = createAsyncThunk(
     bill: Bill;
   }) => {
     console.log(body);
-    const res = await fetch(`${EXPENSE_SERVICE_URL}/${body.expenseId}/bill`, {
+    const response = await request({
+      url: `${EXPENSE_SERVICE_URL}/${body.expenseId}/bill`,
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body.bill)
+      data: body.bill,
     });
-    if (!res.ok) throw new Error("Failed to create bill");
-    const data = await res.json();
+    if (response.status !== 200) throw new Error("Failed to create bill");
+    const data = await response.data as any;
     return {
       expenseId: body.expenseId,
       bill: data.data
@@ -221,13 +260,13 @@ export const updateBill = createAsyncThunk(
     bill: Bill;
   }) => {
     console.log(body);
-    const res = await fetch(`${BILL_SERVICE_URL}/${body.id}`, {
+    const response = await request({
+      url: `${BILL_SERVICE_URL}/${body.id}`,
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body.bill)
+      data: body.bill,
     });
-    if (!res.ok) throw new Error("Failed to update bill");
-    const data = await res.json();
+    if (response.status !== 200) throw new Error("Failed to update bill");
+    const data = await response.data as any;
     return {
       id: body.id,
       bill: data.data
@@ -238,8 +277,11 @@ export const updateBill = createAsyncThunk(
 export const deleteBill = createAsyncThunk(
   "expenseEditor/deleteBill",
   async (billId: string) => {
-    const res = await fetch(`${BILL_SERVICE_URL}/${billId}`, { method: "DELETE" });
-    if (!res.ok) throw new Error("Failed to delete bill");
+    const response = await request({
+      url: `${BILL_SERVICE_URL}/${billId}`,
+      method: "DELETE",
+    });
+    if (response.status !== 200) throw new Error("Failed to delete bill");
     return billId;
   }
 )
@@ -248,8 +290,11 @@ export const deleteMultipleBills = createAsyncThunk(
   "expenseEditor/deleteMultipleBills",
   async (billIds: string[]) => {
     const ids = billIds.join(",");
-    const res = await fetch(`${BILL_SERVICE_URL}?ids=${ids}`, { method: "DELETE" });
-    if (!res.ok) throw new Error("Failed to delete bills");
+    const response = await request({
+      url: `${BILL_SERVICE_URL}?ids=${ids}`,
+      method: "DELETE",
+    });
+    if (response.status !== 200) throw new Error("Failed to delete bills");
     return billIds;
   }
 )
