@@ -88,7 +88,7 @@ export default function LoginScreen() {
             {/* Login button */}
             <TouchableOpacity
                 onPress={handleLogin}
-                className="bg-[#0F6BF0] rounded-full py-4 items-center shadow-md"
+                className="bg-[#0F6BF0] rounded-full py-4 items-center shadow-md active:bg-blue-600"
             >
                 <Text className="text-white text-lg font-semibold">
                     Đăng nhập

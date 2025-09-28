@@ -6,7 +6,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { AppDispatch, RootState } from "../store/store";
 import { Expense } from "../store/slices/expensesSlice";
-import { fetchExpenses, Group } from "../store/slices/groupsSlice";
+import { fetchExpenses, fetchGroupCategories, Group } from "../store/slices/groupsSlice";
 import LoadingOverlay from "../components/LoadingOverlay";
 import type { RootStackParamList } from "../../App";
 
@@ -25,7 +25,13 @@ export default function GroupDetailScreen({ navigation, route }: Props) {
     if (!expenses || expenses.length === 0) {
       dispatch(fetchExpenses(groupId));
     }
+    // Fetch categories for the group
+    dispatch(fetchGroupCategories(groupId));
   }, [dispatch, groupId, expenses?.length]);
+
+  useEffect(() => {
+    console.log(group);
+  }, [group]);
 
   const toYMDLocal = (v: string | Date): string => {
     if (!v) return "";
@@ -86,7 +92,7 @@ export default function GroupDetailScreen({ navigation, route }: Props) {
             navigation.navigate("GroupForm", { type: "edit", groupData: group as Group })
           }
         >
-          <Text className="text-[#0F6BF0]">Members</Text>
+          <Text className="text-[#0F6BF0]">Chỉnh sửa</Text>
         </TouchableOpacity>
       </View>
 

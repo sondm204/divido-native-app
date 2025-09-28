@@ -53,7 +53,8 @@ export const createGroup = createAsyncThunk(
       data: body,
     });
     if (response.status !== 200) throw new Error("Failed to create group");
-    return (await response.data) as Group;
+    const data = await response.data as any;
+    return data.data as Group;
   }
 );
 
@@ -63,6 +64,7 @@ export const updateGroup = createAsyncThunk(
     id: string,
     name: string,
     users?: User[],
+    categories?: Category[],
     createdAt: string
   }) => {
     const response = await request({
@@ -71,7 +73,8 @@ export const updateGroup = createAsyncThunk(
       data: body,
     });
     if (response.status !== 200) throw new Error("Failed to update group");
-    return (await response.data) as Group;
+    const data = await response.data as any;
+    return data.data as Group;
   }
 );
 
@@ -155,7 +158,7 @@ export const fetchGroupCategories = createAsyncThunk(
           url: `${GROUP_SERVICE_URL}/${groupId}/categories`,
           method: "GET",
         });
-        if (res.status === 200) return await res.data;
+        if (res.status === 200) return { groupId, categories: await res.data };
       } catch (error) {
         // If categories endpoint fails, try fallback to group endpoint
         console.log("Categories endpoint failed, trying group endpoint:", error);
@@ -168,7 +171,7 @@ export const fetchGroupCategories = createAsyncThunk(
       });
       if (groupRes.status === 200) {
         const data = await groupRes.data as any;
-        return data.categories || [];
+        return { groupId, categories: data.categories || [] };
       }
       throw new Error("Failed to fetch categories");
     } catch (error) {
@@ -177,7 +180,66 @@ export const fetchGroupCategories = createAsyncThunk(
   }
 );
 
+export const createCategory = createAsyncThunk(
+  "groups/createCategory",
+  async (body: {
+    name: string,
+    groupId: string
+  }) => {
+    const response = await request({
+      url: `${GROUP_SERVICE_URL}/${body.groupId}/categories`,
+      method: "POST",
+      data: { name: body.name },
+    });
+    if (response.status !== 200) throw new Error("Failed to create category");
+    const data = await response.data as any;
+    const category = data.data as Category;
+    return {
+      groupId: body.groupId,
+      category: category
+    };
+  }
+);
 
+export const updateCategory = createAsyncThunk(
+  "groups/updateCategory",
+  async (body: {
+    id: string,
+    name: string,
+    groupId: string
+  }) => {
+    const response = await request({
+      url: `${GROUP_SERVICE_URL}/${body.groupId}/categories/${body.id}`,
+      method: "PUT",
+      data: { name: body.name },
+    });
+    if (response.status !== 200) throw new Error("Failed to update category");
+    const data = await response.data as any;
+    const category = data.data as Category;
+    return {
+      groupId: body.groupId,
+      category: category
+    };
+  }
+);
+
+export const deleteCategory = createAsyncThunk(
+  "groups/deleteCategory",
+  async (body: {
+    id: string,
+    groupId: string
+  }) => {
+    const response = await request({
+      url: `${GROUP_SERVICE_URL}/${body.groupId}/categories/${body.id}`,
+      method: "DELETE",
+    });
+    if (response.status !== 200) throw new Error("Failed to delete category");
+    return {
+      groupId: body.groupId,
+      id: body.id
+    }
+  }
+);
 
 
 export const postCreateExpense = createAsyncThunk(
@@ -449,7 +511,76 @@ const groupsSlice = createSlice({
       .addCase(updateBill.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message ?? "Failed to update bill";
-      });
+      })
+      // create category
+      .addCase(createCategory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createCategory.fulfilled, (state, action: PayloadAction<{ groupId: string; category: Category }>) => {
+        state.loading = false;
+        const { groupId, category } = action.payload;
+        const group = Array.isArray(state.groups) ? state.groups.find(group => group.id === groupId) || null : null;
+        if (group) {
+          group.categories = [...(group.categories || []), category];
+        }
+      })
+      .addCase(createCategory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to create category";
+      })
+      // update category
+      .addCase(updateCategory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateCategory.fulfilled, (state, action: PayloadAction<{ groupId: string; category: Category }>) => {
+        state.loading = false;
+        const { groupId, category } = action.payload;
+        const group = Array.isArray(state.groups) ? state.groups.find(group => group.id === groupId) || null : null;
+        if (group) {
+          group.categories = [...(group.categories || []), category];
+        }
+      })
+      .addCase(updateCategory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to update category";
+      })
+      // delete category
+      .addCase(deleteCategory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteCategory.fulfilled, (state, action: PayloadAction<{ groupId: string; id: string }>) => {
+        state.loading = false;
+        const { groupId, id } = action.payload;
+        const group = Array.isArray(state.groups) ? state.groups.find(group => group.id === groupId) || null : null;
+        if (group) {
+          group.categories = group.categories?.filter(category => category.id !== id) || [];
+        }
+      })
+      .addCase(deleteCategory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to delete category";
+      })
+      // fetch group categories
+      .addCase(fetchGroupCategories.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchGroupCategories.fulfilled, (state, action: PayloadAction<{ groupId: string; categories: Category[] }>) => {
+        state.loading = false;
+        const { groupId, categories } = action.payload;
+        // Find the group and update its categories
+        const group = state.groups.find(group => group.id === groupId);
+        if (group) {
+          group.categories = categories;
+        }
+      })
+      .addCase(fetchGroupCategories.rejected, (state, action) => {
+        state.loading = false;
+        state.error = typeof action.payload === 'string' ? action.payload : (action.error.message ?? 'Error');
+      })
   },
 });
 

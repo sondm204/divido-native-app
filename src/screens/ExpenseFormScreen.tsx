@@ -127,12 +127,12 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
   useEffect(() => {
     (async () => {
       try {
-        const [ms, cs]: [User[], Category[]] = await Promise.all([
+        const [ms, categoriesResult]: [User[], { groupId: string; categories: Category[] }] = await Promise.all([
           dispatch(fetchGroupMembers(groupId)).unwrap(),
           dispatch(fetchGroupCategories(groupId)).unwrap(),
         ]);
         setMembers(ms);
-        setCategories(cs);
+        setCategories(categoriesResult.categories);
 
         // chọn tất cả mặc định
         const sel: Record<string, boolean> = {};

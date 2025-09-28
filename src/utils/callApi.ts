@@ -12,9 +12,12 @@ export const request = async <T>(options: RequestOptions): Promise<{ data: T; st
     ...options.headers, // Merge custom headers if provided
   });
 
-  const token = await getToken();
-  if (token) {
-    headers.append("Authorization", "Bearer " + token);
+  const isLoginRequest = options.url.includes('/login');
+  if (!isLoginRequest) {
+    const token = await getToken();
+    if (token) {
+      headers.append("Authorization", "Bearer " + token);
+    }
   }
 
   const finalOptions: RequestInit = {
