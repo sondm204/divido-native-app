@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useDispatch } from "react-redux";
-import type { AppDispatch } from "../store/store";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../store/store";
 import { RootStackParamList } from "../../App";
 import AppInput from "../components/AppInput";
 import AppButton from "../components/AppButton";
-import { Group, createGroup, fetchGroups, updateGroup } from "../store/slices/groupsSlice";
+import { Group, createGroup, fetchGroups, updateGroup, createCategory, deleteCategory } from "../store/slices/groupsSlice";
 import { User } from "../store/slices/userSlice";
 import { getUserByEmail } from "../store/slices/userSlice";
+import { Category } from "../store/slices/expensesSlice";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type GroupFormRouteProp = RouteProp<RootStackParamList, "GroupForm">;
@@ -20,12 +21,37 @@ export default function GroupFormScreen() {
   const { type, groupData } = route.params;
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const dispatch = useDispatch<AppDispatch>();
+  const currentUser = useSelector((state: RootState) => state.auth.currentUser);
   const [formData, setFormData] = useState<Group>(
-    groupData ?? { id: "", name: "", users: [], createdAt: new Date().toISOString() }
+    groupData ? {
+      ...groupData,
+      categories: groupData.categories || [],
+      createdAt: groupData.createdAt || new Date().toISOString()
+    } : {
+      id: "",
+      name: "",
+      users: currentUser ? [currentUser] : [],
+      createdAt: new Date().toISOString()
+    }
   );
   const [isOpenDropDown, setIsOpenDropDown] = useState(false);
   const [searchUser, setSearchUser] = useState<User>();
   const [searchEmail, setSearchEmail] = useState<string>('');
+  const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState<string>('');
+
+  // Ensure current user is always included in new groups
+  useEffect(() => {
+    if (type === 'add' && currentUser && formData.users) {
+      const hasCurrentUser = formData.users.some(user => user.id === currentUser.id);
+      if (!hasCurrentUser) {
+        setFormData(prev => ({
+          ...prev,
+          users: [currentUser, ...(prev.users || [])]
+        }));
+      }
+    }
+  }, [currentUser, type]);
 
   function checkEmailSuffix(text: string) {
     const regex = /@(gmail\.com|yahoo\.com|outlook\.com)$/;
@@ -61,7 +87,37 @@ export default function GroupFormScreen() {
   }
 
   const removeChooseUser = (userId: string) => {
+    // Prevent removing the current user
+    if (currentUser && userId === currentUser.id) {
+      return;
+    }
     setFormData({ ...formData, users: formData.users?.filter((user) => user.id !== userId) });
+  }
+
+  const handleAddCategory = () => {
+    if (newCategoryName.trim()) {
+      const newCategory: Category = {
+        id: Date.now().toString(), // Temporary ID for local state
+        name: newCategoryName.trim()
+      };
+      const updatedFormData = {
+        ...formData,
+        categories: [...(formData.categories || []), newCategory]
+      };
+      console.log('Adding category, updated form data:', updatedFormData);
+      setFormData(updatedFormData);
+      setNewCategoryName('');
+      setIsCategoryFormOpen(false);
+    }
+  }
+
+  const handleRemoveCategory = (categoryId: string) => {
+    const updatedFormData = {
+      ...formData,
+      categories: formData.categories?.filter((category) => category.id !== categoryId)
+    };
+    console.log('Removing category, updated form data:', updatedFormData);
+    setFormData(updatedFormData);
   }
 
   async function handleCreate() {
@@ -72,12 +128,12 @@ export default function GroupFormScreen() {
         return;
       }
 
-      try {
-        await dispatch(createGroup({
-          name: formData.name.trim(),
-          users: formData.users,
-          createdAt: formData.createdAt
-        })).unwrap();
+        try {
+          await dispatch(createGroup({
+            name: formData.name.trim(),
+            users: formData.users,
+            createdAt: formData.createdAt
+          })).unwrap();
 
         // Refetch groups to ensure we have the latest data
         dispatch(fetchGroups());
@@ -92,6 +148,7 @@ export default function GroupFormScreen() {
           id: formData.id,
           name: formData.name.trim(),
           users: formData.users,
+          categories: formData.categories,
           createdAt: formData.createdAt
         })).unwrap();
         dispatch(fetchGroups());
@@ -129,11 +186,22 @@ export default function GroupFormScreen() {
         <Text className="text-sm text-slate-600 mb-2">Thành viên</Text>
         <View className="flex flex-col border border-slate-300 rounded-lg px-2 gap-2">
           <View className="flex-row gap-2 p-2 overflow-x-auto">
-            {formData.users?.map((user) => (
-              <Text key={user.id || `${user.email || user.name}-${user.name}`}
-                onPress={() => removeChooseUser(user.id)}
-                className="bg-blue-500 text-white rounded-full py-1 px-4 active:bg-red-500">{user.name}</Text>
-            ))}
+            {formData.users?.map((user) => {
+              const isCurrentUser = currentUser && user.id === currentUser.id;
+              return (
+                <Text 
+                  key={user.id || `${user.email || user.name}-${user.name}`}
+                  onPress={() => !isCurrentUser && removeChooseUser(user.id)}
+                  className={`rounded-full py-1 px-4 ${
+                    isCurrentUser 
+                      ? "bg-gray-400 text-white" 
+                      : "bg-blue-500 text-white active:bg-red-500"
+                  }`}
+                >
+                  {user.name} {isCurrentUser ? "(Bạn)" : ""}
+                </Text>
+              );
+            })}
           </View>
           <AppInput
             placeholder="Tìm kiếm..."
@@ -157,6 +225,51 @@ export default function GroupFormScreen() {
           )}
         </View>
       </View>
+
+      {type === 'edit' && (
+        <View className="mb-4">
+          <Text className="text-sm text-slate-600 mb-2">Danh mục</Text>
+        <View className="flex flex-col border border-slate-300 rounded-lg px-2 gap-2">
+          <ScrollView className="p-2" horizontal showsHorizontalScrollIndicator={false}>
+            {formData.categories?.map((category) => (
+              <Text key={category.id}
+                onPress={() => handleRemoveCategory(category.id)}
+                className="bg-green-500 mx-[2px] text-white rounded-full py-1 px-4 active:bg-red-500">{category.name}</Text>
+            ))}
+            </ScrollView>
+          {!isCategoryFormOpen ? (
+            <TouchableOpacity
+              onPress={() => setIsCategoryFormOpen(true)}
+              className="border border-slate-300 rounded-lg p-2 mb-2 bg-blue-50">
+              <Text className="text-blue-600 text-center font-medium">+ Thêm danh mục</Text>
+            </TouchableOpacity>
+          ) : (
+            <View className="border border-slate-300 rounded-lg p-2 mb-2">
+              <AppInput
+                placeholder="Tên danh mục..."
+                value={newCategoryName}
+                onChangeText={setNewCategoryName}
+              />
+              <View className="flex-row gap-2 mt-2">
+                <TouchableOpacity
+                  onPress={handleAddCategory}
+                  className="flex-1 bg-green-500 rounded-lg py-2">
+                  <Text className="text-white text-center font-medium">Thêm</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setIsCategoryFormOpen(false);
+                    setNewCategoryName('');
+                  }}
+                  className="flex-1 bg-gray-500 rounded-lg py-2">
+                  <Text className="text-white text-center font-medium">Hủy</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        </View>
+        </View>
+      )}
 
       <View className="mb-4">
         <Text className="text-sm text-slate-600 mb-2">Ngày tạo</Text>

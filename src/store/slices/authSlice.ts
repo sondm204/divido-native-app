@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AUTH_SERVER_URL } from "../../commons/constants";
-import { storeToken } from "@/src/utils/utils";
+import { AUTH_SERVICE_URL } from "../../commons/constants";
+import { removeToken, storeToken } from "@/src/utils/utils";
 import { request } from "@/src/utils/callApi";
 
 // Kiểu dữ liệu user
@@ -40,12 +40,11 @@ export const login = createAsyncThunk(
   ) => {
     try {
       const response = await request({
-        url: `${AUTH_SERVER_URL}/login`,
+        url: `${AUTH_SERVICE_URL}/login`,
         method: "POST",
         data: params,
         credentials: "include",
       });
-
       if (response.status !== 200) {
         throw new Error("Login failed");
       }
@@ -63,7 +62,7 @@ export const emailVerification = createAsyncThunk(
   async (params: { email: string }, { rejectWithValue }) => {
     try {
       const response = await request({
-        url: `${AUTH_SERVER_URL}/email-verification`,
+        url: `${AUTH_SERVICE_URL}/email-verification`,
         method: "POST",
         data: params,
       });
@@ -82,7 +81,7 @@ export const verifyEmail = createAsyncThunk(
   async (params: { email: string; code: string }, { rejectWithValue }) => {
     try {
       const response = await request({
-        url: `${AUTH_SERVER_URL}/verify-email`,
+        url: `${AUTH_SERVICE_URL}/verify-email`,
         method: "POST",
         data: params,
       });
@@ -105,7 +104,7 @@ export const register = createAsyncThunk(
   ) => {
     try {
       const response = await request({
-        url: `${AUTH_SERVER_URL}/register`,
+        url: `${AUTH_SERVICE_URL}/register`,
         method: "POST",
         data: params,
       });
