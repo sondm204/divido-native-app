@@ -24,6 +24,7 @@
     "expo-status-bar": "~3.0.8",
     "lucide-react": "^0.542.0",
     "lucide-react-native": "^0.542.0",
+    "mixpanel-react-native": "^3.1.2",
     "nativewind": "^4.1.23",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "prop-types": "^15.8.1",

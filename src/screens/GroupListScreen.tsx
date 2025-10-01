@@ -14,6 +14,7 @@ import LoadingOverlay from "../components/LoadingOverlay";
 import { Trash2, Trash } from "lucide-react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Mixpanel } from "../utils/mixpanel";
 
 
 // ---- Types ----
@@ -32,10 +33,13 @@ export default function GroupsListScreen() {
     const loading = useSelector((state: RootState) => state.groups.loading);
 
     useEffect(() => {
+        Mixpanel.trackScreenView("GroupsList");
+        Mixpanel.timeEvent("Fetch Groups Duration");
         dispatch(fetchGroups());
     }, [dispatch]);
 
     function handleDelete(groupId: string) {
+        Mixpanel.track("Group Delete Click", { group_id: groupId });
         dispatch(deleteGroup(groupId));
     }
 
@@ -43,6 +47,7 @@ export default function GroupsListScreen() {
         return (
             <TouchableOpacity
                 onPress={() => {
+                    Mixpanel.track("Group Item Click", { group_id: item.id, group_name: item.name });
                     dispatch(setSelectedGroupId(item.id));
                     navigation.navigate("GroupDetail", { groupId: item.id })
                 }}

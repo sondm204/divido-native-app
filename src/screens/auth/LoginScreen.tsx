@@ -11,6 +11,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../store/slices/authSlice";
 import { AppDispatch, RootState } from "../../store/store";
+import { Mixpanel } from "../../utils/mixpanel";
 
 type RootStackParamList = {
     Login: undefined;
@@ -28,17 +29,21 @@ export default function LoginScreen() {
 
     async function handleLogin() {
         try {
+            Mixpanel.track("Click Login Button", {});
             const resultAction = await dispatch(login({ email, password }));
 
             if (login.fulfilled.match(resultAction)) {
                 // Login thành công
+                Mixpanel.track("Login Success", {});
                 navigation.replace("GroupsList");
             } else {
                 // Login thất bại, có thể lấy lỗi
                 const errorMsg = resultAction.payload || "Login failed MESS";
+                Mixpanel.track("Login Failure", { reason: String(errorMsg) });
                 alert(errorMsg);
             }
         } catch (err) {
+            Mixpanel.track("Login Failure", { reason: err instanceof Error ? err.message : String(err) });
             console.log(err);
         }
     }

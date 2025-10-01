@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AUTH_SERVICE_URL } from "../../commons/constants";
 import { removeToken, storeToken } from "@/src/utils/utils";
 import { request } from "@/src/utils/callApi";
+import { Mixpanel } from "@/src/utils/mixpanel";
 
 // Kiểu dữ liệu user
 export interface User {
@@ -126,6 +127,7 @@ export const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
+      Mixpanel.track("Logout", {});
       state.currentUser = null;
       state.error = null;
       state.loading = false;
@@ -144,6 +146,11 @@ export const authSlice = createSlice({
           name: action.payload.name,
           email: action.payload.email,
         };
+        Mixpanel.identify(user.id);
+        Mixpanel.people.set({
+          $email: user.email,
+          $name: user.name,
+        });
         state.loading = false;
         state.currentUser = user;
         storeToken(action.payload.token);
@@ -151,6 +158,7 @@ export const authSlice = createSlice({
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+        Mixpanel.track("Login Failure", { reason: String(action.payload) });
       });
 
     // REGISTER
