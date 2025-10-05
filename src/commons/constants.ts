@@ -1,4 +1,5 @@
-export const API_BASE_URL = 'https://divido-be.onrender.com';
+// export const API_BASE_URL = 'https://divido-be.onrender.com';
+export const API_BASE_URL = 'https://divido-be-635587337955.asia-southeast1.run.app';
 export const API_BASE_URL_LOCAL = 'http://localhost:8080';
 
 // services
