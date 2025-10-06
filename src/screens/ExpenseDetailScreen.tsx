@@ -17,11 +17,12 @@ import { createBill, updateBill } from "../store/slices/groupsSlice";
 import { User } from "../store/slices/userSlice";
 import { Modal, Button } from "react-native";
 
-import {useNavigation } from "@react-navigation/native"; // ✅ thêm useNavigation
+import { useNavigation } from "@react-navigation/native"; // ✅ thêm useNavigation
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { ChevronLeft } from "lucide-react-native";
 type ExpenseDetailScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "ExpenseDetail"
+    RootStackParamList,
+    "ExpenseDetail"
 >;
 
 
@@ -49,14 +50,6 @@ export default function ExpenseDetailScreen() {
             dispatch(fetchBill(expenseId));
         }
     }, [expenseId]);
- function handleCreate() {
-    navigation.reload();
-  }
-
-const [showAddBill, setShowAddBill] = useState(false);
-const [billName2, setBillName2] = useState("");
-const [billAmount, setBillAmount] = useState("");
-const [billPrice, setBillPrice] = useState("");
 
     function formatCurrency(value?: number) {
         const n = Number(value || 0);
@@ -130,7 +123,7 @@ const [billPrice, setBillPrice] = useState("");
 
     return (
         <SafeAreaView className="flex-1 p-4">
-            <Text className="text-lg font-bold mb-2">Chi tiết chi tiêu</Text>
+            <Text className="text-4xl font-bold mb-2 text-white text-center">Chi tiết chi tiêu</Text>
 
             {/* Thông tin chính */}
             <View className="bg-white p-4 rounded-xl mb-4 shadow">
@@ -143,11 +136,22 @@ const [billPrice, setBillPrice] = useState("");
                 <Text className="text-slate-900 font-bold mt-2">
                     Tổng: {formatCurrency(expense?.amount || 0)}đ
                 </Text>
-                {expense?.shareRatios.map((s, index) => (
-                    <Text key={`${s.username}-${index}`}>
-                        {s.username}: {formatCurrency(s.ratio * expense?.amount)}đ
-                    </Text>
-                ))}
+                {(() => {
+                    const ratios = expense?.shareRatios || [];
+                    const totalRatio = ratios.reduce((sum, r) => sum + Number(r.ratio || 0), 0);
+                    const normalized = Math.abs(totalRatio - 1) < 1e-6 && totalRatio > 0;
+                    const amount = Number(expense?.amount || 0);
+                    return ratios.map((s, index) => {
+                        const r = Number(s.ratio || 0);
+                        const weight = normalized ? r : (totalRatio > 0 ? r / totalRatio : 0);
+                        const shareAmount = Math.round(weight * amount);
+                        return (
+                            <Text key={`${s.username}-${index}`}>
+                                {s.username}: {formatCurrency(shareAmount)}đ
+                            </Text>
+                        );
+                    });
+                })()}
             </View>
 
             {/* Bảng chi tiết bill */}
@@ -197,8 +201,8 @@ const [billPrice, setBillPrice] = useState("");
                     <View className="gap-3">
                         <AppInput
                             label="Tên món"
-                            value={billName2}
-                            onChangeText={setBillName2}
+                            value={billName}
+                            onChangeText={setBillName}
                             placeholder="Nhập tên món"
                         />
                         <AppInput

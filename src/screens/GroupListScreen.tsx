@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
     FlatList,
     TouchableOpacity,
@@ -11,10 +11,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { deleteGroup, fetchGroups, Group, setSelectedGroupId } from "../store/slices/groupsSlice";
 import { AppDispatch, RootState } from "../store/store";
 import LoadingOverlay from "../components/LoadingOverlay";
-import { Trash2, Trash } from "lucide-react-native";
+import { Trash2, Trash, House } from "lucide-react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Mixpanel } from "../utils/mixpanel";
+import CustomModal from "../components/CustomModal";
 
 
 // ---- Types ----
@@ -32,6 +33,9 @@ export default function GroupsListScreen() {
     const groups = useSelector((state: RootState) => state.groups.groups);
     const loading = useSelector((state: RootState) => state.groups.loading);
 
+    const [confirmVisible, setConfirmVisible] = useState(false);
+    const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
     useEffect(() => {
         Mixpanel.trackScreenView("GroupsList");
         Mixpanel.timeEvent("Fetch Groups Duration");
@@ -41,6 +45,17 @@ export default function GroupsListScreen() {
     function handleDelete(groupId: string) {
         Mixpanel.track("Group Delete Click", { group_id: groupId });
         dispatch(deleteGroup(groupId));
+        setConfirmVisible(false);
+        setPendingDeleteId(null);
+    }
+
+    function openDeleteConfirm(groupId: string) {
+        setPendingDeleteId(groupId);
+        setConfirmVisible(true);
+    }
+
+    function formatDate(date: string) {
+        return new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
     function renderItem({ item }: { item: Group }) {
@@ -51,9 +66,9 @@ export default function GroupsListScreen() {
                     dispatch(setSelectedGroupId(item.id));
                     navigation.navigate("GroupDetail", { groupId: item.id })
                 }}
-                className="py-3"
+                className="py-2"
             >
-                <View className="flex flex-row items-center justify-between w-full">
+                <View className="relative flex flex-row items-center justify-between w-full bg-white rounded-xl p-4">
                     <View className="flex-row items-center">
                         <View className="w-12 h-12 rounded-full bg-slate-200 mr-3 items-center justify-center">
                             <Text className="text-lg font-semibold text-slate-700">
@@ -65,17 +80,19 @@ export default function GroupsListScreen() {
                             </Text>
                         </View>
                         <View className="flex-1">
-                            <Text className="text-base font-medium text-slate-900">
+                            <Text className="font-bold text-slate-900 text-lg">
                                 {item.name}
                             </Text>
-                            {item.users && (
+                            <Text className="text-sm text-slate-500 mt-0.5">{item.users?.length} thành viên</Text>
+                            {/* {item.users && (
                                 <Text className="text-sm text-slate-500 mt-0.5">{item.users.map((user) => user.name).join(", ")}</Text>
-                            )}
+                            )} */}
+                            <Text className="text-sm text-right text-slate-500 mt-0.5">{formatDate(item.createdAt)}</Text>
                         </View>
                     </View>
                     <TouchableOpacity
-                        onPress={() => handleDelete(item.id)}
-                        style={{ alignItems: 'center', justifyContent: 'center', padding: 8, minWidth: 40 }}
+                        className="absolute right-0 top-0 items-center justify-center p-4 min-w-10"
+                        onPress={() => openDeleteConfirm(item.id)}
                     >
                         <Trash2 size={20} color="#ef4444" />
                     </TouchableOpacity>
@@ -86,24 +103,24 @@ export default function GroupsListScreen() {
 
     const renderHiddenItem = (data: any, rowMap: any) => (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            
+
         </View>
     );
 
     return (
         <SafeAreaView className="flex-1 px-4">
-            <Text className="text-4xl font-bold mb-4">Nhóm</Text>
-            {/* <FlatList data={groups} keyExtractor={(g) => g.id} renderItem={renderItem} /> */}
+            <Text className="text-4xl font-bold mb-4 text-white text-center">Nhóm</Text>
             {groups.length > 0 ? (
-            <SwipeListView
-                data={groups}
-                keyExtractor={(g) => (g?.id ? String(g.id) : `${g.name}-${g.createdAt}`)}
-                renderItem={renderItem}
-                renderHiddenItem={renderHiddenItem}
-                leftOpenValue={0}
-                rightOpenValue={-75} // Move to the left to reveal delete button
-                disableRightSwipe={true}
-            />
+                <FlatList data={groups} keyExtractor={(g) => g.id} renderItem={renderItem} />
+                // <SwipeListView
+                //     data={groups}
+                //     keyExtractor={(g) => (g?.id ? String(g.id) : `${g.name}-${g.createdAt}`)}
+                //     renderItem={renderItem}
+                //     renderHiddenItem={renderHiddenItem}
+                //     leftOpenValue={0}
+                //     rightOpenValue={-100} 
+                //     disableRightSwipe={true}
+                // />
             ) : (
                 <Text className="text-center text-gray-500">Không có nhóm</Text>
             )}
@@ -111,6 +128,14 @@ export default function GroupsListScreen() {
                 <Text className="text-white text-2xl">+</Text>
             </TouchableOpacity>
             <LoadingOverlay visible={loading} />
+            <CustomModal
+                visible={confirmVisible}
+                onClose={() => { setConfirmVisible(false); setPendingDeleteId(null); }}
+                onConfirm={() => { if (pendingDeleteId) { handleDelete(pendingDeleteId); } }}
+                confirmText="Xóa"
+            >
+                <Text>Bạn có chắc muốn xóa nhóm này?</Text>
+            </CustomModal>
         </SafeAreaView>
     );
 }

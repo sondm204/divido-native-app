@@ -104,7 +104,6 @@ export default function GroupFormScreen() {
         ...formData,
         categories: [...(formData.categories || []), newCategory]
       };
-      console.log('Adding category, updated form data:', updatedFormData);
       setFormData(updatedFormData);
       setNewCategoryName('');
       setIsCategoryFormOpen(false);
@@ -116,7 +115,6 @@ export default function GroupFormScreen() {
       ...formData,
       categories: formData.categories?.filter((category) => category.id !== categoryId)
     };
-    console.log('Removing category, updated form data:', updatedFormData);
     setFormData(updatedFormData);
   }
 
@@ -163,9 +161,9 @@ export default function GroupFormScreen() {
 
   return (
     <SafeAreaView className="flex-1 p-4">
-      <Text className="text-lg font-bold mb-4">{type === 'add' ? 'Tạo nhóm mới' : 'Chỉnh sửa nhóm'}</Text>
+      <Text className="text-4xl font-bold mb-4 text-white text-center">{type === 'add' ? 'Tạo nhóm mới' : 'Chỉnh sửa nhóm'}</Text>
       <View className="mb-4">
-        <Text className="text-sm text-slate-600 mb-2">Tên nhóm</Text>
+        <Text className="text-sm mb-2 text-white">Tên nhóm</Text>
         <AppInput
           value={formData.name}
           onChangeText={(text) => setFormData({ ...formData, name: text })}
@@ -175,7 +173,7 @@ export default function GroupFormScreen() {
 
 
       <View className="mb-4">
-        <Text className="text-sm text-slate-600 mb-2">Số lượng người</Text>
+        <Text className="text-sm text-white mb-2">Số lượng người</Text>
         <AppInput
           value={formData.users?.length?.toString() || '0'}
           editable={false}
@@ -183,8 +181,8 @@ export default function GroupFormScreen() {
       </View>
 
       <View className="mb-4">
-        <Text className="text-sm text-slate-600 mb-2">Thành viên</Text>
-        <View className="flex flex-col border border-slate-300 rounded-lg px-2 gap-2">
+        <Text className="text-sm text-white mb-2">Thành viên</Text>
+        <View className="flex flex-col border border-slate-500 rounded-lg p-2 gap-2">
           <View className="flex-row gap-2 p-2 overflow-x-auto">
             {formData.users?.map((user) => {
               const isCurrentUser = currentUser && user.id === currentUser.id;
@@ -211,14 +209,14 @@ export default function GroupFormScreen() {
           {isOpenDropDown && (
             <TouchableOpacity
               onPress={handleChooseUser}
-              className="border border-slate-300 rounded-lg p-2 mb-2">
+              className="border border-slate-500 rounded-lg p-2 mb-2">
               <View className="flex flex-row gap-2 w-full">
                 <View className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
                   <Text className="text-white text-center">{searchUser?.name?.split(' ')[0]?.slice(0, 1)?.toUpperCase() || '?'}</Text>
                 </View>
                 <View className="flex-1 flex flex-col gap-1">
-                  <Text className="text-sm font-bold">{searchUser?.name}</Text>
-                  <Text className="text-xs text-slate-500">{searchUser?.email}</Text>
+                  <Text className="text-sm font-bold text-white">{searchUser?.name}</Text>
+                  <Text className="text-xs text-slate-400">{searchUser?.email}</Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -228,8 +226,8 @@ export default function GroupFormScreen() {
 
       {type === 'edit' && (
         <View className="mb-4">
-          <Text className="text-sm text-slate-600 mb-2">Danh mục</Text>
-        <View className="flex flex-col border border-slate-300 rounded-lg px-2 gap-2">
+          <Text className="text-sm text-white mb-2">Danh mục</Text>
+        <View className="flex flex-col border border-slate-500 rounded-lg p-2 gap-2">
           <ScrollView className="p-2" horizontal showsHorizontalScrollIndicator={false}>
             {formData.categories?.map((category) => (
               <Text key={category.id}
@@ -240,11 +238,11 @@ export default function GroupFormScreen() {
           {!isCategoryFormOpen ? (
             <TouchableOpacity
               onPress={() => setIsCategoryFormOpen(true)}
-              className="border border-slate-300 rounded-lg p-2 mb-2 bg-blue-50">
+              className="border border-slate-500 rounded-lg p-2 mb-2 bg-blue-50">
               <Text className="text-blue-600 text-center font-medium">+ Thêm danh mục</Text>
             </TouchableOpacity>
           ) : (
-            <View className="border border-slate-300 rounded-lg p-2 mb-2">
+            <View className="border border-slate-500 rounded-lg p-2 mb-2">
               <AppInput
                 placeholder="Tên danh mục..."
                 value={newCategoryName}
@@ -272,7 +270,7 @@ export default function GroupFormScreen() {
       )}
 
       <View className="mb-4">
-        <Text className="text-sm text-slate-600 mb-2">Ngày tạo</Text>
+        <Text className="text-sm text-white mb-2">Ngày tạo</Text>
         <AppInput
           value={formData.createdAt ? new Date(formData.createdAt).toLocaleDateString("vi-VN") : new Date().toLocaleDateString("vi-VN")}
           editable={false}
