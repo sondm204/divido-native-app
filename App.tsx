@@ -23,6 +23,9 @@ import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import "@/global.css";
 import VerifyCodeScreen from "./src/screens/auth/VerifyCodeScreen";
 import EmailScreen from "./src/screens/auth/EmailScreen";
+import { useEffect } from "react";
+import * as NavigationBar from "expo-navigation-bar";
+import { View } from "react-native";
 
 export type RootStackParamList = {
   GroupsList: undefined;
@@ -57,30 +60,33 @@ export default function App() {
     <GluestackUIProvider mode="light">
       <Provider store={store}>
         <SafeAreaProvider>
-          <NavigationContainer>
-            {/* ✅ AppWrapper ở TRONG NavigationContainer nên có thể dùng useNavigation */}
-            <AppWrapper>
-              <StatusBar style="dark" />
-              <Stack.Navigator
-                initialRouteName="Login"
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: "#F7FAFF" },
-                }}
-              >
-                <Stack.Screen name="GroupsList" component={GroupsListScreen} />
-                <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
-                <Stack.Screen name="GroupForm" component={GroupFormScreen} />
-                <Stack.Screen name="ExpenseForm" component={ExpenseFormScreen} />
-                <Stack.Screen name="ExpenseDetail" component={ExpenseDetailScreen} />
-                <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="VerifyCode" component={VerifyCodeScreen} />
-                <Stack.Screen name="Email" component={EmailScreen} />
-                <Stack.Screen name="Register" component={RegisterScreen} />
-                <Stack.Screen name="ForgotPassword" component={ForgetPasswordScreen} />
-              </Stack.Navigator>
-            </AppWrapper>
-          </NavigationContainer>
+          <View style={{ flex: 1, backgroundColor: "#2c333f" }}>
+            <NavigationContainer>
+              {/* ✅ AppWrapper ở TRONG NavigationContainer nên có thể dùng useNavigation */}
+              <AppWrapper>
+                <StatusBar style="dark" backgroundColor="#2c333f" />
+                <Stack.Navigator
+                  initialRouteName="Login"
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: "#2c333f" },
+                  }}
+                >
+                  <Stack.Screen name="GroupsList" component={GroupsListScreen} 
+                   options={{ navigationBarColor: "green", navigationBarHidden: false, }} />
+                  <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
+                  <Stack.Screen name="GroupForm" component={GroupFormScreen} />
+                  <Stack.Screen name="ExpenseForm" component={ExpenseFormScreen} />
+                  <Stack.Screen name="ExpenseDetail" component={ExpenseDetailScreen} />
+                  <Stack.Screen name="Login" component={LoginScreen} />
+                  <Stack.Screen name="VerifyCode" component={VerifyCodeScreen} />
+                  <Stack.Screen name="Email" component={EmailScreen} />
+                  <Stack.Screen name="Register" component={RegisterScreen} />
+                  <Stack.Screen name="ForgotPassword" component={ForgetPasswordScreen} />
+                </Stack.Navigator>
+              </AppWrapper>
+            </NavigationContainer>
+          </View>
         </SafeAreaProvider>
       </Provider>
     </GluestackUIProvider>

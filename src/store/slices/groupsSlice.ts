@@ -245,7 +245,6 @@ export const deleteCategory = createAsyncThunk(
 export const postCreateExpense = createAsyncThunk(
   "groups/postCreateExpense",
   async ({ groupId, body }: { groupId: string; body: unknown }) => {
-    console.log("body", body);
     const response = await request({
       url: `${GROUP_SERVICE_URL}/${groupId}/expenses`,
       method: "POST",
@@ -300,7 +299,6 @@ export const createBill = createAsyncThunk(
     expenseId: string;
     bill: Bill;
   }) => {
-    console.log(body);
     const response = await request({
       url: `${EXPENSE_SERVICE_URL}/${body.expenseId}/bill`,
       method: "POST",
@@ -321,7 +319,6 @@ export const updateBill = createAsyncThunk(
     id: string;
     bill: Bill;
   }) => {
-    console.log(body);
     const response = await request({
       url: `${BILL_SERVICE_URL}/${body.id}`,
       method: "PUT",

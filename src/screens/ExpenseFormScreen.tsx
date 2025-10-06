@@ -22,7 +22,6 @@ import { AppSectionCard } from "../components/AppSectionCard";
 import { User } from "../store/slices/userSlice";
 import { Category } from "../store/slices/expensesSlice";
 
-/* ============================== TYPES ============================== */
 type ID = string;
 
 // Using User and Category types from Redux slices
@@ -178,7 +177,8 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
     let shareRatios: { user: { id: ID }; ratio: number }[] = [];
 
     if (splitMode === "EQUAL") {
-      shareRatios = selectedIds.map((id) => ({ user: { id }, ratio: 1 }));
+      const per = selectedIds.length > 0 ? 1 / selectedIds.length : 0;
+      shareRatios = selectedIds.map((id) => ({ user: { id }, ratio: per }));
     } else if (splitMode === "RATIO") {
       const arr = selectedIds.map((id) => {
         const v = parseFloat(ratioInput[id] || "0");
@@ -188,19 +188,17 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
         Alert.alert("Thiếu dữ liệu", "Nhập tỷ lệ hợp lệ (> 0)");
         return null;
       }
+      // Use raw user-entered weights; backend can normalize when computing amounts
       shareRatios = arr;
     } else if (splitMode === "EXACT") {
-      let sum = 0;
-      const arr = selectedIds.map((id) => {
-        const v = parseInt(exactInput[id] || "0", 10);
-        sum += v;
-        return { user: { id }, ratio: amt > 0 ? v / amt : 0 };
-      });
+      const values = selectedIds.map((id) => parseInt(exactInput[id] || "0", 10));
+      const sum = values.reduce((s, v) => s + (isNaN(v) ? 0 : v), 0);
       if (sum !== amt) {
         Alert.alert("Sai tổng tiền", `Tổng EXACT = ${sum} phải bằng ${amt}`);
         return null;
       }
-      shareRatios = arr;
+      // Store raw entered amounts as weights to avoid rounding; UI will normalize when displaying
+      shareRatios = selectedIds.map((id, idx) => ({ user: { id }, ratio: isNaN(values[idx]) ? 0 : values[idx] }));
     }
 
     return {
@@ -235,16 +233,16 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
   const selectedCount = selectedIds.length;
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F7FAFF]">
+    <SafeAreaView className="flex-1">
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
-          <Text className="text-2xl font-bold mb-2">
+          <Text className="text-4xl font-bold mb-2 text-white text-center">
             {mode === "create" ? "Thêm chi tiêu" : "Sửa chi tiêu"}
           </Text>
-          <Text className="text-slate-500 mb-4">Quản lý chi tiêu nhóm • nhanh & gọn</Text>
+          <Text className="text-slate-400 mb-4 text-center">Quản lý chi tiêu nhóm • nhanh & gọn</Text>
 
           {/* Category */}
           <AppSectionCard title="Danh mục">
@@ -270,7 +268,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
             <View className="mb-3">
               <Text className="text-sm text-slate-600 mb-2">Số tiền</Text>
               <View className="relative">
-                <Text className="absolute left-4 top-3.5 text-slate-400">₫</Text>
+                <Text pointerEvents="none" className="absolute left-4 top-3.5 z-10 text-slate-400">₫</Text>
                 <TextInput
                   keyboardType="numeric"
                   value={amount}

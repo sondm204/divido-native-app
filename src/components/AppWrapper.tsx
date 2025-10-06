@@ -7,7 +7,7 @@ type AppWrapperProps = PropsWithChildren<{}>;
 export default function AppWrapper({ children }: AppWrapperProps) {
   return (
     <SafeAreaView className="flex-1">
-      <View className="flex-1 bg-[#F7FAFF]">
+      <View className="flex-1 bg-[#2c333f]">
         {children}
       </View>
     </SafeAreaView>
