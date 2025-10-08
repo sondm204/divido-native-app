@@ -33,8 +33,10 @@ export interface Expense {
   payer: User;
   spentAt: Date;
   note: string;
+  imageUrl: string;
   shareRatios: ShareRatio[];
-  bills?: Bill[]
+  bills?: Bill[],
+  createdAt?: string;
 }
 
 export const createBill = createAsyncThunk(

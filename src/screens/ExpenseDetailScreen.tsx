@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, FlatList, TouchableOpacity, TextInput, Pressable } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, TextInput, Pressable, Image } from "react-native";
 import type { Expense, Bill } from "../store/slices/expensesSlice"; // file chứa các interface của bạn
 import { RootStackParamList } from "../../App";
 import { RouteProp, useRoute } from "@react-navigation/native";
@@ -45,6 +45,7 @@ export default function ExpenseDetailScreen() {
     const [owner, setOwner] = useState<User[]>([]);
     const availableOwners = groupUsers.filter(u => !owner.some(o => o.id === u.id));
     const [selectedBillIds, setSelectedBillIds] = useState<string[]>([]);
+    const [imageModalVisible, setImageModalVisible] = useState(false);
     useEffect(() => {
         if (expense?.bills?.length === 0) {
             dispatch(fetchBill(expenseId));
@@ -126,32 +127,44 @@ export default function ExpenseDetailScreen() {
             <Text className="text-4xl font-bold mb-2 text-white text-center">Chi tiết chi tiêu</Text>
 
             {/* Thông tin chính */}
-            <View className="bg-white p-4 rounded-xl mb-4 shadow">
-                <Text className="text-base font-semibold mb-1">{expense?.note}</Text>
-                <Text className="text-slate-600">Người chi: {expense?.payer.name}</Text>
-                <Text className="text-slate-600">
-                    Ngày: {new Date(expense?.spentAt || "").toLocaleDateString("vi-VN")}
-                </Text>
-                <Text className="text-slate-600">Danh mục: {expense?.category.name}</Text>
-                <Text className="text-slate-900 font-bold mt-2">
-                    Tổng: {formatCurrency(expense?.amount || 0)}đ
-                </Text>
-                {(() => {
-                    const ratios = expense?.shareRatios || [];
-                    const totalRatio = ratios.reduce((sum, r) => sum + Number(r.ratio || 0), 0);
-                    const normalized = Math.abs(totalRatio - 1) < 1e-6 && totalRatio > 0;
-                    const amount = Number(expense?.amount || 0);
-                    return ratios.map((s, index) => {
-                        const r = Number(s.ratio || 0);
-                        const weight = normalized ? r : (totalRatio > 0 ? r / totalRatio : 0);
-                        const shareAmount = Math.round(weight * amount);
-                        return (
-                            <Text key={`${s.username}-${index}`}>
-                                {s.username}: {formatCurrency(shareAmount)}đ
-                            </Text>
-                        );
-                    });
-                })()}
+            <View className="flex-row items-center justify-between bg-white p-4 rounded-xl mb-4 shadow">
+                <View className="">
+                    <Text className="text-base font-semibold mb-1">{expense?.note}</Text>
+                    <Text className="text-slate-600">Người chi: {expense?.payer.name}</Text>
+                    <Text className="text-slate-600">
+                        Ngày: {new Date(expense?.spentAt || "").toLocaleDateString("vi-VN")}
+                    </Text>
+                    <Text className="text-slate-600">Danh mục: {expense?.category.name}</Text>
+                    <Text className="text-slate-900 font-bold mt-2">
+                        Tổng: {formatCurrency(expense?.amount || 0)}đ
+                    </Text>
+                    {(() => {
+                        const ratios = expense?.shareRatios || [];
+                        const totalRatio = ratios.reduce((sum, r) => sum + Number(r.ratio || 0), 0);
+                        const normalized = Math.abs(totalRatio - 1) < 1e-6 && totalRatio > 0;
+                        const amount = Number(expense?.amount || 0);
+                        return ratios.map((s, index) => {
+                            const r = Number(s.ratio || 0);
+                            const weight = normalized ? r : (totalRatio > 0 ? r / totalRatio : 0);
+                            const shareAmount = Math.round(weight * amount);
+                            return (
+                                <Text key={`${s.username}-${index}`}>
+                                    {s.username}: {formatCurrency(shareAmount)}đ
+                                </Text>
+                            );
+                        });
+                    })()}
+                </View>
+                <TouchableOpacity 
+                    onPress={() => setImageModalVisible(true)}
+                    className="h-36 w-24 overflow-hidden rounded-lg"
+                >
+                    <Image 
+                        source={{ uri: expense?.imageUrl }} 
+                        className="h-full w-full" 
+                        style={{ resizeMode: 'cover' }}
+                    />
+                </TouchableOpacity>
             </View>
 
             {/* Bảng chi tiết bill */}
@@ -256,6 +269,34 @@ export default function ExpenseDetailScreen() {
                     </View>
                 </View>
             </CustomModal>
+            
+            {/* Image Modal */}
+            <Modal
+                visible={imageModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setImageModalVisible(false)}
+            >
+                <View className="flex-1 bg-black/90 justify-center items-center">
+                    <TouchableOpacity 
+                        className="absolute top-12 right-4 z-10"
+                        onPress={() => setImageModalVisible(false)}
+                    >
+                        <Text className="text-white text-lg font-bold">✕</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        className="flex-1 w-full justify-center items-center"
+                        onPress={() => setImageModalVisible(false)}
+                    >
+                        <Image 
+                            source={{ uri: expense?.imageUrl }} 
+                            className="w-full h-4/5"
+                            style={{ resizeMode: 'contain' }}
+                        />
+                    </TouchableOpacity>
+                </View>
+            </Modal>
+            
             <LoadingOverlay visible={loading} text="Đang tải hóa đơn..." />
         </SafeAreaView>
     );
