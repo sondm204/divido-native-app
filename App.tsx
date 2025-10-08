@@ -43,6 +43,7 @@ export type RootStackParamList = {
       payerId: string;
       spentAt: string; // yyyy-MM-dd
       note?: string;
+      imageUrl?: string;
       shareRatios: { userId: string; ratio: number }[];
     };
   };

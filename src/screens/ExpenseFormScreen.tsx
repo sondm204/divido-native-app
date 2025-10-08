@@ -9,6 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppInput from "../components/AppInput";
@@ -21,6 +22,8 @@ import { AppAvatar } from "../components/AppAvatar";
 import { AppSectionCard } from "../components/AppSectionCard";
 import { User } from "../store/slices/userSlice";
 import { Category } from "../store/slices/expensesSlice";
+import { uploadImage } from "../api/uploadService";
+import * as ImagePicker from 'expo-image-picker';
 
 type ID = string;
 
@@ -38,6 +41,7 @@ type ExpenseFormParams = {
     payerId: string;
     spentAt: string; // yyyy-MM-dd
     note?: string;
+    imageUrl?: string;
     shareRatios: { userId: string; ratio: number }[];
   };
 };
@@ -47,35 +51,6 @@ type Props = {
   route: { params: ExpenseFormParams };
 };
 
-/* ============================== API RAW ============================ */
-const BASE_URL = "https://divido-be.onrender.com";
-
-// Tạo / Cập nhật expense
-// async function postCreateExpense(groupId: string, body: unknown) {
-//   const res = await fetch(`${BASE_URL}/groups/${groupId}/expenses`, {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(body),
-//   });
-//   if (!res.ok) {
-//     const msg = await res.text().catch(() => "");
-//     throw new Error(msg || "Fail to create expense");
-//   }
-//   return res.json();
-// }
-
-// async function putUpdateExpense(expenseId: string, body: unknown) {
-//   const res = await fetch(`${BASE_URL}/expenses/${expenseId}`, {
-//     method: "PUT",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(body),
-//   });
-//   if (!res.ok) {
-//     const msg = await res.text().catch(() => "");
-//     throw new Error(msg || "Fail to update expense");
-//   }
-//   return res.json();
-// }
 
 export default function ExpenseFormScreen({ navigation, route }: Props) {
   const Segment: React.FC<{
@@ -115,6 +90,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
     initial?.spentAt ?? new Date().toISOString().slice(0, 10)
   );
   const [note, setNote] = useState<string>(initial?.note ?? "");
+  const [imageUrl, setImageUrl] = useState<string>(initial?.imageUrl ?? "");
   const [splitMode, setSplitMode] = useState<SplitMode>("EQUAL");
 
   // participants
@@ -166,6 +142,54 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
     setSelected((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
+  const pickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission denied', 'Bạn cần cấp quyền để chọn ảnh 📷');
+        return;
+      }
+  
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.8,
+      });
+  
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+  
+        const fileUri = asset.uri;
+        const fileName = asset.fileName || 'image.jpg';
+        const mimeType = getMimeType(fileName);
+  
+        setLoading(true);
+        const uploadResult = await uploadImage(fileUri, fileName, mimeType);
+        setImageUrl(uploadResult.data);
+        setLoading(false);
+      }
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Error', 'Tải ảnh thất bại, vui lòng thử lại.');
+      console.error('Image upload error:', error);
+    }
+  };
+
+  const getMimeType = (fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      default:
+        return 'application/octet-stream';
+    }
+  };
+
   function buildPayload() {
     const amt = parseInt(amount || "0", 10);
     if (!categoryId) return Alert.alert("Thiếu dữ liệu", "Chọn danh mục"), null;
@@ -207,6 +231,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
       payer: { id: payerId },
       spentAt,
       note,
+      imageUrl,
       shareRatios,
       bills: [],
     };
@@ -218,8 +243,8 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
 
     try {
       setLoading(true);
-        if (mode === "create") await dispatch(postCreateExpense({ groupId, body: payload })).unwrap();
-        else await dispatch(putUpdateExpense({ expenseId: expenseId as string, body: payload })).unwrap();
+      if (mode === "create") await dispatch(postCreateExpense({ groupId, body: payload })).unwrap();
+      else await dispatch(putUpdateExpense({ expenseId: expenseId as string, body: payload })).unwrap();
 
       await dispatch(fetchExpenses(groupId));
       setLoading(false);
@@ -247,10 +272,10 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
           {/* Category */}
           <AppSectionCard title="Danh mục">
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {categories.length === 0 ? (
-                  <Text className="text-slate-400">Chưa có danh mục</Text>
-                ) : (
-                  categories.map((c: Category) => (
+              {categories.length === 0 ? (
+                <Text className="text-slate-400">Chưa có danh mục</Text>
+              ) : (
+                categories.map((c: Category) => (
                   <AppChip
                     key={c.id}
                     label={c.name}
@@ -298,6 +323,35 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
               />
             </View>
           </AppSectionCard>
+
+          {/* Image Upload */}
+          <AppSectionCard title="Hình ảnh">
+            <View className="flex-row items-center gap-4">
+              {imageUrl ? (
+                <View className="flex-row items-center gap-3">
+                  <Image
+                    source={{ uri: imageUrl }}
+                    className="w-20 h-20 rounded-lg"
+                    style={{ resizeMode: 'cover' }}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setImageUrl("")}
+                    className="bg-red-500 px-3 py-2 rounded-lg"
+                  >
+                    <Text className="text-white text-sm">Xóa</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  onPress={pickImage}
+                  className="border-2 border-dashed border-slate-300 rounded-lg p-4 items-center justify-center w-32 h-20"
+                >
+                  <Text className="text-slate-500 text-sm">+ Thêm ảnh</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </AppSectionCard>
+
 
           {/* Payer */}
           <AppSectionCard title="Người trả">

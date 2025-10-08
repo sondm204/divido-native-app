@@ -45,13 +45,7 @@ export default function GroupDetailScreen({ navigation, route }: Props) {
 
     const sectionList = Array.from(dateToExpenses.entries()).map(([title, data]) => ({
       title,
-      data: data
-        .sort((a, b) => {
-          const t = new Date(b.expense.spentAt).getTime() - new Date(a.expense.spentAt).getTime();
-          if (t !== 0) return t; // primary: spentAt desc
-          return b.originalIndex - a.originalIndex; // secondary: newest (later index) first
-        })
-        .map((x) => x.expense),
+      data: data.map((x) => x.expense),
     }));
 
     // Sort sections by date desc; YYYY-MM-DD string allows lexicographic sort
@@ -83,10 +77,15 @@ export default function GroupDetailScreen({ navigation, route }: Props) {
         payerId: item.payer.id,
         spentAt: toYMDLocal(item.spentAt),
         note: item.note,
-        shareRatios: (item.shareRatios ?? []).map((sr: any) => ({
-          userId: sr.user?.id ?? sr.userId,
-          ratio: Number(sr.ratio),
-        })),
+        imageUrl: item.imageUrl,
+        shareRatios: (item.shareRatios ?? []).map((sr: any) => {
+          // Find the user ID by matching username
+          const user = group?.users?.find((m: any) => m.name === sr.username);
+          return {
+            userId: user?.id ?? sr.userId,
+            ratio: Number(sr.ratio),
+          };
+        }),
       },
     });
   }
