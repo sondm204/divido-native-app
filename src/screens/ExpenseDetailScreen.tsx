@@ -18,6 +18,7 @@ import { User } from "../store/slices/userSlice";
 import { Modal, Button } from "react-native";
 
 import { useNavigation } from "@react-navigation/native"; // ✅ thêm useNavigation
+import { BACKGROUND_COLOR, TEXT_COLOR, CARD_COLOR } from "../commons/constants";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ChevronLeft } from "lucide-react-native";
 type ExpenseDetailScreenNavigationProp = NativeStackNavigationProp<
@@ -78,12 +79,12 @@ export default function ExpenseDetailScreen() {
             onLongPress={() => {
                 selectedBillIds.includes(item.id) ? setSelectedBillIds(selectedBillIds.filter(id => id !== item.id)) : setSelectedBillIds([...selectedBillIds, item.id]);
             }}
-            className={`flex-row items-center px-3 py-4 border-b border-slate-100 active:bg-slate-200 ${selectedBillIds.includes(item.id) ? 'bg-slate-200' : ''}`}>
-            <Text style={{ width: '25%' }} className="">{item.name}</Text>
-            <Text style={{ width: '10%' }} className="text-center">{item.quantity}</Text>
-            <Text style={{ width: '20%' }} className="text-right">{formatCurrency(item.unitPrice)}</Text>
-            <Text style={{ width: '20%' }} className="text-right">{formatCurrency(item.totalPrice)}</Text>
-            <Text style={{ width: '25%' }} className="text-right">{(item.owner || []).map((o) => o.name).join(", ")}</Text>
+            className={`flex-row items-center px-3 py-4 border-b border-slate-700 active:bg-slate-800 ${selectedBillIds.includes(item.id) ? 'bg-slate-200' : ''}`}>
+            <Text style={{ width: '25%', color: TEXT_COLOR }} className="">{item.name}</Text>
+            <Text style={{ width: '10%', color: TEXT_COLOR }} className="text-center">{item.quantity}</Text>
+            <Text style={{ width: '20%', color: TEXT_COLOR }} className="text-right">{formatCurrency(item.unitPrice)}</Text>
+            <Text style={{ width: '20%', color: TEXT_COLOR }} className="text-right">{formatCurrency(item.totalPrice)}</Text>
+            <Text style={{ width: '25%', color: TEXT_COLOR }} className="text-right">{(item.owner || []).map((o) => o.name).join(", ")}</Text>
         </TouchableOpacity>
     );
 
@@ -123,19 +124,19 @@ export default function ExpenseDetailScreen() {
     };
 
     return (
-        <SafeAreaView className="flex-1 p-4">
-            <Text className="text-4xl font-bold mb-2 text-white text-center">Chi tiết chi tiêu</Text>
+        <SafeAreaView className="flex-1 p-4" style={{ backgroundColor: BACKGROUND_COLOR }}>
+            <Text className="text-4xl font-bold mb-2 text-center" style={{ color: TEXT_COLOR }}>Chi tiết chi tiêu</Text>
 
             {/* Thông tin chính */}
-            <View className="flex-row items-center justify-between bg-white p-4 rounded-xl mb-4 shadow">
+            <View className="flex-row items-center justify-between p-4 rounded-xl mb-4 shadow" style={{ backgroundColor: CARD_COLOR }}>
                 <View className="">
-                    <Text className="text-base font-semibold mb-1">{expense?.note}</Text>
-                    <Text className="text-slate-600">Người chi: {expense?.payer.name}</Text>
-                    <Text className="text-slate-600">
+                    <Text className="text-base font-semibold mb-1" style={{ color: TEXT_COLOR }}>{expense?.note}</Text>
+                    <Text style={{ color: TEXT_COLOR}}>Người chi: {expense?.payer.name}</Text>
+                    <Text style={{ color: TEXT_COLOR}}>
                         Ngày: {new Date(expense?.spentAt || "").toLocaleDateString("vi-VN")}
                     </Text>
-                    <Text className="text-slate-600">Danh mục: {expense?.category.name}</Text>
-                    <Text className="text-slate-900 font-bold mt-2">
+                    <Text style={{ color: TEXT_COLOR}}>Danh mục: {expense?.category.name}</Text>
+                    <Text className="font-bold mt-2" style={{ color: TEXT_COLOR }}>
                         Tổng: {formatCurrency(expense?.amount || 0)}đ
                     </Text>
                     {(() => {
@@ -148,7 +149,7 @@ export default function ExpenseDetailScreen() {
                             const weight = normalized ? r : (totalRatio > 0 ? r / totalRatio : 0);
                             const shareAmount = Math.round(weight * amount);
                             return (
-                                <Text key={`${s.username}-${index}`}>
+                                <Text key={`${s.username}-${index}`} style={{ color: TEXT_COLOR}}>
                                     {s.username}: {formatCurrency(shareAmount)}đ
                                 </Text>
                             );
@@ -188,13 +189,13 @@ export default function ExpenseDetailScreen() {
                 </View>
             )}
             {expense?.bills && expense?.bills.length > 0 && (
-                <View className="bg-white rounded-xl shadow border border-slate-200">
+                <View className="rounded-xl shadow border border-slate-700" style={{ backgroundColor: CARD_COLOR }}>
                     <View className="flex-row px-3 py-2 border-b border-slate-200">
-                        <Text style={{ width: '25%' }} className="font-semibold">Tên món</Text>
-                        <Text style={{ width: '10%' }} className="text-center font-semibold">SL</Text>
-                        <Text style={{ width: '20%' }} className="text-right font-semibold">Đơn giá</Text>
-                        <Text style={{ width: '20%' }} className="text-right font-semibold">Tổng</Text>
-                        <Text style={{ width: '25%' }} className="text-right font-semibold">Chủ nhân</Text>
+                        <Text style={{ width: '25%', color: TEXT_COLOR }} className="font-semibold">Tên món</Text>
+                        <Text style={{ width: '10%', color: TEXT_COLOR }} className="text-center font-semibold">SL</Text>
+                        <Text style={{ width: '20%', color: TEXT_COLOR }} className="text-right font-semibold">Đơn giá</Text>
+                        <Text style={{ width: '20%', color: TEXT_COLOR }} className="text-right font-semibold">Tổng</Text>
+                        <Text style={{ width: '25%', color: TEXT_COLOR }} className="text-right font-semibold">Chủ nhân</Text>
                     </View>
                     <FlatList
                         data={expense?.bills}
@@ -210,7 +211,7 @@ export default function ExpenseDetailScreen() {
                 confirmText={editingBill ? "Cập nhật" : "Thêm"}
             >
                 <View>
-                    <Text className="text-base font-semibold mb-3">{editingBill ? "Cập nhật hóa đơn" : "Thêm hóa đơn"}</Text>
+                    <Text className="text-base font-semibold mb-3" style={{ color: TEXT_COLOR }}>{editingBill ? "Cập nhật hóa đơn" : "Thêm hóa đơn"}</Text>
                     <View className="gap-3">
                         <AppInput
                             label="Tên món"
@@ -233,7 +234,7 @@ export default function ExpenseDetailScreen() {
                             keyboardType="numeric"
                         />
                         <View className="gap-3">
-                            <View className="p-2 border border-slate-200 rounded-lg">
+                            <View className="p-2 border border-slate-600 rounded-lg">
                                 <Text className="text-sm text-slate-600 mb-2">Đã chọn</Text>
                                 <View className="flex-row flex-wrap gap-2">
                                     {owner.length === 0 && (
@@ -243,13 +244,13 @@ export default function ExpenseDetailScreen() {
                                         <Text
                                             key={user.id || `${user.email || user.name}-${user.name}`}
                                             onPress={() => setOwner(owner.filter((o) => o.id !== user.id))}
-                                            className="bg-blue-500 text-white rounded-full py-1 px-4 active:bg-blue-600">
+                                            className="bg-blue-500 rounded-full py-1 px-4 active:bg-blue-600" style={{ color: TEXT_COLOR }}>
                                             {user.name}
                                         </Text>
                                     ))}
                                 </View>
                             </View>
-                            <View className="p-2 border border-slate-200 rounded-lg">
+                            <View className="p-2 border border-slate-600 rounded-lg">
                                 <Text className="text-sm text-slate-600 mb-2">Thành viên</Text>
                                 <View className="flex-row flex-wrap gap-2">
                                     {availableOwners.length === 0 && (
@@ -282,7 +283,7 @@ export default function ExpenseDetailScreen() {
                         className="absolute top-12 right-4 z-10"
                         onPress={() => setImageModalVisible(false)}
                     >
-                        <Text className="text-white text-lg font-bold">✕</Text>
+                        <Text className="text-lg font-bold" style={{ color: TEXT_COLOR }}>✕</Text>
                     </TouchableOpacity>
                     <TouchableOpacity 
                         className="flex-1 w-full justify-center items-center"
@@ -297,7 +298,7 @@ export default function ExpenseDetailScreen() {
                 </View>
             </Modal>
             
-            <LoadingOverlay visible={loading} text="Đang tải hóa đơn..." />
+            <LoadingOverlay visible={loading} />
         </SafeAreaView>
     );
 }

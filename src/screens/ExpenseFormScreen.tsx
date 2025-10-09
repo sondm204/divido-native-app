@@ -18,6 +18,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store/store";
 import { fetchExpenses, fetchGroupCategories, fetchGroupMembers, postCreateExpense, putUpdateExpense } from "../store/slices/groupsSlice";
 import { AppChip } from "../components/AppChip";
+import { BACKGROUND_COLOR, TEXT_COLOR, CARD_COLOR, PLACEHOLDER_COLOR } from "../commons/constants";
 import { AppAvatar } from "../components/AppAvatar";
 import { AppSectionCard } from "../components/AppSectionCard";
 import { User } from "../store/slices/userSlice";
@@ -58,14 +59,15 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
     current: SplitMode;
     onChange: (v: SplitMode) => void;
   }> = ({ current, onChange }) => (
-    <View className="bg-slate-100 rounded-xl p-1 flex-row">
+    <View className="bg-slate-600 rounded-xl p-1 flex-row">
       {(["EQUAL", "RATIO", "EXACT"] as SplitMode[]).map((k) => (
         <TouchableOpacity
           key={k}
           onPress={() => onChange(k)}
-          className={`px-3 py-2 rounded-lg ${current === k ? "bg-white shadow" : ""}`}
+          className={`px-3 py-2 rounded-lg ${current === k ? "shadow" : ""}`}
+          style={{ backgroundColor: current === k ? CARD_COLOR : 'transparent' }}
         >
-          <Text className={`text-xs font-medium ${current === k ? "text-[#0F6BF0]" : "text-slate-600"}`}>
+          <Text className={`text-xs font-medium ${current === k ? "text-[#0F6BF0]" : "text-slate-100"}`}>
             {k}
           </Text>
         </TouchableOpacity>
@@ -262,9 +264,10 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ backgroundColor: BACKGROUND_COLOR }}
       >
         <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
-          <Text className="text-4xl font-bold mb-2 text-white text-center">
+          <Text className="text-4xl font-bold mb-2 text-center" style={{ color: TEXT_COLOR }}>
             {mode === "create" ? "Thêm chi tiêu" : "Sửa chi tiêu"}
           </Text>
           <Text className="text-slate-400 mb-4 text-center">Quản lý chi tiêu nhóm • nhanh & gọn</Text>
@@ -299,9 +302,10 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
                   value={amount}
                   onChangeText={setAmount}
                   placeholder="0"
-                  className={`bg-white rounded-2xl border p-3 pl-7 ${!amount ? "border-red-400" : "border-slate-200"
+                  className={`rounded-2xl border p-3 pl-7 ${!amount ? "border-red-500" : "border-slate-700"
                     }`}
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={PLACEHOLDER_COLOR}
+                  style={{ color: TEXT_COLOR }}
                 />
               </View>
               {!amount && <Text className="text-xs text-red-500 mt-1">Bắt buộc</Text>}
@@ -338,7 +342,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
                     onPress={() => setImageUrl("")}
                     className="bg-red-500 px-3 py-2 rounded-lg"
                   >
-                    <Text className="text-white text-sm">Xóa</Text>
+                    <Text className="text-sm" style={{ color: TEXT_COLOR }}>Xóa</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -402,9 +406,10 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
                   const name = members.find((m) => m.id === id)?.name ?? id;
                   return (
                     <View key={id} className="flex-row items-center mb-2">
-                      <Text className="w-28 text-slate-700">{name}</Text>
+                      <Text className="w-28" style={{ color: TEXT_COLOR }}>{name}</Text>
                       <TextInput
-                        className="flex-1 bg-white rounded-xl border border-slate-200 p-3"
+                        className="flex-1 rounded-xl border border-slate-700 p-3"
+                        style={{ backgroundColor: CARD_COLOR, color: TEXT_COLOR }}
                         keyboardType="numeric"
                         value={ratioInput[id] || ""}
                         onChangeText={(t) => setRatioInput((s) => ({ ...s, [id]: t }))}
@@ -426,14 +431,15 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
                   const name = members.find((m) => m.id === id)?.name ?? id;
                   return (
                     <View key={id} className="flex-row items-center mb-2">
-                      <Text className="w-28 text-slate-700">{name}</Text>
+                      <Text className="w-28" style={{ color: TEXT_COLOR }}>{name}</Text>
                       <TextInput
-                        className="flex-1 bg-white rounded-xl border border-slate-200 p-3"
+                        className="flex-1 rounded-xl border border-slate-700 p-3"
+                        style={{ backgroundColor: CARD_COLOR, color: TEXT_COLOR }}
                         keyboardType="numeric"
                         value={exactInput[id] || ""}
                         onChangeText={(t) => setExactInput((s) => ({ ...s, [id]: t }))}
                         placeholder="0"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={PLACEHOLDER_COLOR}
                       />
                     </View>
                   );
@@ -444,12 +450,12 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
         </ScrollView>
 
         {/* Bottom action */}
-        <View className="absolute left-0 right-0 bottom-0 bg-white border-t p-4">
+        <View className="absolute left-0 right-0 bottom-0 border-t p-4" style={{ backgroundColor: CARD_COLOR }}>
           <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-slate-600">
+            <Text className="" style={{ color: TEXT_COLOR }}  >
               Chia cho <Text className="font-semibold">{selectedCount}</Text> người
             </Text>
-            <Text className="text-slate-900 font-bold">
+            <Text className="font-bold" style={{ color: TEXT_COLOR }}>
               ₫{(parseInt(amount || "0", 10) || 0).toLocaleString()}
             </Text>
           </View>

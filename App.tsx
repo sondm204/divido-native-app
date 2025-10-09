@@ -4,7 +4,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./global.css";
 
-import GroupsListScreen from "./src/screens/GroupListScreen";
 import GroupDetailScreen from "./src/screens/GroupDetailScreen";
 import GroupFormScreen from "./src/screens/GroupFormScreen";
 import ExpenseDetailScreen from "./src/screens/ExpenseDetailScreen";
@@ -17,17 +16,18 @@ import { Group } from "./src/store/slices/groupsSlice";
 import LoginScreen from "./src/screens/auth/LoginScreen";
 import RegisterScreen from "./src/screens/auth/RegisterScreen";
 import ForgetPasswordScreen from "./src/screens/auth/ForgetPasswordScreen";
+import MainScreen from "./src/screens/MainScreen";
 
 
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import "@/global.css";
 import VerifyCodeScreen from "./src/screens/auth/VerifyCodeScreen";
 import EmailScreen from "./src/screens/auth/EmailScreen";
-import { useEffect } from "react";
-import * as NavigationBar from "expo-navigation-bar";
 import { View } from "react-native";
+import { BACKGROUND_COLOR } from "./src/commons/constants";
 
 export type RootStackParamList = {
+  MainTabs: undefined; // Add this for the bottom tab navigation
   GroupsList: undefined;
   GroupDetail: { groupId: string };
   GroupForm: { type: "add" | "edit"; groupData: Group };
@@ -58,38 +58,40 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
-    <GluestackUIProvider mode="light">
-      <Provider store={store}>
-        <SafeAreaProvider>
-          <View style={{ flex: 1, backgroundColor: "#2c333f" }}>
-            <NavigationContainer>
-              {/* ✅ AppWrapper ở TRONG NavigationContainer nên có thể dùng useNavigation */}
-              <AppWrapper>
-                <StatusBar style="dark" backgroundColor="#2c333f" />
-                <Stack.Navigator
-                  initialRouteName="Login"
-                  screenOptions={{
-                    headerShown: false,
-                    contentStyle: { backgroundColor: "#2c333f" },
-                  }}
-                >
-                  <Stack.Screen name="GroupsList" component={GroupsListScreen} 
-                   options={{ navigationBarColor: "green", navigationBarHidden: false, }} />
-                  <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
-                  <Stack.Screen name="GroupForm" component={GroupFormScreen} />
-                  <Stack.Screen name="ExpenseForm" component={ExpenseFormScreen} />
-                  <Stack.Screen name="ExpenseDetail" component={ExpenseDetailScreen} />
-                  <Stack.Screen name="Login" component={LoginScreen} />
-                  <Stack.Screen name="VerifyCode" component={VerifyCodeScreen} />
-                  <Stack.Screen name="Email" component={EmailScreen} />
-                  <Stack.Screen name="Register" component={RegisterScreen} />
-                  <Stack.Screen name="ForgotPassword" component={ForgetPasswordScreen} />
-                </Stack.Navigator>
-              </AppWrapper>
-            </NavigationContainer>
-          </View>
-        </SafeAreaProvider>
-      </Provider>
-    </GluestackUIProvider>
+    <Provider store={store}>
+      <SafeAreaProvider>
+        <View style={{ flex: 1, backgroundColor: BACKGROUND_COLOR }}>
+          <NavigationContainer>
+            {/* ✅ AppWrapper ở TRONG NavigationContainer nên có thể dùng useNavigation */}
+            <AppWrapper>
+              <StatusBar style="dark" backgroundColor={BACKGROUND_COLOR} />
+              <Stack.Navigator
+                initialRouteName="Login"
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: BACKGROUND_COLOR },
+                }}
+              >
+                {/* Main app with bottom tabs - shown after login */}
+                <Stack.Screen name="MainTabs" component={MainScreen} />
+
+                {/* Individual screens that can be navigated to from tabs */}
+                <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
+                <Stack.Screen name="GroupForm" component={GroupFormScreen} />
+                <Stack.Screen name="ExpenseForm" component={ExpenseFormScreen} />
+                <Stack.Screen name="ExpenseDetail" component={ExpenseDetailScreen} />
+
+                {/* Auth screens */}
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="VerifyCode" component={VerifyCodeScreen} />
+                <Stack.Screen name="Email" component={EmailScreen} />
+                <Stack.Screen name="Register" component={RegisterScreen} />
+                <Stack.Screen name="ForgotPassword" component={ForgetPasswordScreen} />
+              </Stack.Navigator>
+            </AppWrapper>
+          </NavigationContainer>
+        </View>
+      </SafeAreaProvider>
+    </Provider>
   );
 }

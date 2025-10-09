@@ -10,6 +10,7 @@ import { fetchExpenses, fetchGroupCategories, Group } from "../store/slices/grou
 import LoadingOverlay from "../components/LoadingOverlay";
 import type { RootStackParamList } from "../../App";
 import { SquarePen } from "lucide-react-native";
+import { BACKGROUND_COLOR, TEXT_COLOR, CARD_COLOR } from "../commons/constants";
 
 type Props = NativeStackScreenProps<RootStackParamList, "GroupDetail">;
 
@@ -97,21 +98,22 @@ export default function GroupDetailScreen({ navigation, route }: Props) {
         onPress={() => navigation.navigate("ExpenseDetail", { expenseId: item.id })}
         onLongPress={() => goEditExpense(item)}
         delayLongPress={300}
-        className={`p-3 bg-white shadow-sm ${isLastInSection ? "rounded-b-lg mb-2" : ""}`}
+        className={`p-3 shadow-sm ${isLastInSection ? "rounded-b-lg mb-2" : ""}`}
+        style={{ backgroundColor: CARD_COLOR }}
       >
         <View className="flex-row justify-between">
-          <Text className="font-semibold">{item.payer.name}</Text>
-          <Text className="font-bold text-slate-900">₫{item.amount.toLocaleString()}</Text>
+          <Text className="font-semibold" style={{ color: TEXT_COLOR }}>{item.payer.name}</Text>
+          <Text className="font-bold text-slate-400">₫{item.amount.toLocaleString()}</Text>
         </View>
-        <Text className="text-slate-500 mt-1">{item.note}</Text>
+        <Text className="text-slate-400 mt-1">{item.note}</Text>
       </TouchableOpacity>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView className="flex-1" style={{ backgroundColor: BACKGROUND_COLOR }}>
       <View className="px-4 py-3 flex-row items-center justify-between">
-        <Text className="text-4xl font-bold text-white">{group?.name}</Text>
+        <Text className="text-4xl font-bold" style={{ color: TEXT_COLOR }}>{group?.name}</Text>
         <TouchableOpacity
           onPress={() =>
             navigation.navigate("GroupForm", { type: "edit", groupData: group as Group })
@@ -148,9 +150,9 @@ export default function GroupDetailScreen({ navigation, route }: Props) {
           const monthName = months[date.getMonth()];
           const year = String(date.getFullYear());
           return (
-            <View className="px-4 py-2 mt-2 bg-slate-100 rounded-t-lg">
-              <Text className="text-slate-700 font-semibold">{weekday}</Text>
-              <Text className="text-slate-500">{`${day} ${monthName} ${year}`}</Text>
+            <View className="px-4 py-2 mt-2 bg-slate-500 rounded-t-lg">
+              <Text className="font-semibold" style={{ color: TEXT_COLOR }}>{weekday}</Text>
+              <Text className="" style={{ color: TEXT_COLOR }}>{`${day} ${monthName} ${year}`}</Text>
             </View>
           );
         }}
@@ -165,7 +167,7 @@ export default function GroupDetailScreen({ navigation, route }: Props) {
       />
 
       <TouchableOpacity onPress={goCreateExpense} className="absolute right-6 bottom-8 w-14 h-14 bg-[#0F6BF0] rounded-full items-center justify-center shadow-lg">
-        <Text className="text-white text-2xl">+</Text>
+        <Text className="text-2xl" style={{ color: TEXT_COLOR }}>+</Text>
       </TouchableOpacity>
 
       <LoadingOverlay visible={loading} />

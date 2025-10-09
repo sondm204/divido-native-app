@@ -15,6 +15,7 @@ import { Mixpanel } from "../../utils/mixpanel";
 
 type RootStackParamList = {
     Login: undefined;
+    MainTabs: undefined;
     GroupsList: undefined;
     Email: undefined;
     ForgotPassword: undefined;
@@ -35,7 +36,7 @@ export default function LoginScreen() {
             if (login.fulfilled.match(resultAction)) {
                 // Login thành công
                 Mixpanel.track("Login Success", {});
-                navigation.replace("GroupsList");
+                navigation.replace("MainTabs");
             } else {
                 // Login thất bại, có thể lấy lỗi
                 const errorMsg = resultAction.payload || "Login failed MESS";
