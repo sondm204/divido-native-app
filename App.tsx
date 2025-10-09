@@ -25,9 +25,11 @@ import VerifyCodeScreen from "./src/screens/auth/VerifyCodeScreen";
 import EmailScreen from "./src/screens/auth/EmailScreen";
 import { View } from "react-native";
 import { BACKGROUND_COLOR } from "./src/commons/constants";
+import SurveyScreen from "./src/screens/SurveyScreen";
 
 export type RootStackParamList = {
-  MainTabs: undefined; // Add this for the bottom tab navigation
+  SurveyScreen: undefined;
+  MainScreen: undefined; // Add this for the bottom tab navigation
   GroupsList: undefined;
   GroupDetail: { groupId: string };
   GroupForm: { type: "add" | "edit"; groupData: Group };
@@ -73,7 +75,8 @@ export default function App() {
                 }}
               >
                 {/* Main app with bottom tabs - shown after login */}
-                <Stack.Screen name="MainTabs" component={MainScreen} />
+                <Stack.Screen name="SurveyScreen" component={SurveyScreen} />
+                <Stack.Screen name="MainScreen" component={MainScreen} />
 
                 {/* Individual screens that can be navigated to from tabs */}
                 <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
