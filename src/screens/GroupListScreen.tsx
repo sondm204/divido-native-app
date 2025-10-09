@@ -16,6 +16,7 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Mixpanel } from "../utils/mixpanel";
 import CustomModal from "../components/CustomModal";
+import { BACKGROUND_COLOR, CARD_COLOR, TEXT_COLOR } from "../commons/constants";
 
 
 // ---- Types ----
@@ -68,7 +69,7 @@ export default function GroupsListScreen() {
                 }}
                 className="py-2"
             >
-                <View className="relative flex flex-row items-center justify-between w-full bg-white rounded-xl p-4">
+                <View className="relative flex flex-row items-center justify-between w-full rounded-xl p-4" style={{ backgroundColor: CARD_COLOR }}>
                     <View className="flex-row items-center">
                         <View className="w-12 h-12 rounded-full bg-slate-200 mr-3 items-center justify-center">
                             <Text className="text-lg font-semibold text-slate-700">
@@ -80,7 +81,7 @@ export default function GroupsListScreen() {
                             </Text>
                         </View>
                         <View className="flex-1">
-                            <Text className="font-bold text-slate-900 text-lg">
+                            <Text className="font-bold text-lg" style={{ color: TEXT_COLOR }}>
                                 {item.name}
                             </Text>
                             <Text className="text-sm text-slate-500 mt-0.5">{item.users?.length} thành viên</Text>
@@ -108,8 +109,8 @@ export default function GroupsListScreen() {
     );
 
     return (
-        <SafeAreaView className="flex-1 px-4">
-            <Text className="text-4xl font-bold mb-4 text-white text-center">Nhóm</Text>
+        <SafeAreaView className="flex-1 px-4" style={{ backgroundColor: BACKGROUND_COLOR }}>
+            <Text className="text-4xl font-bold mb-4 text-center" style={{ color: TEXT_COLOR }}>Nhóm</Text>
             {groups.length > 0 ? (
                 <FlatList data={groups} keyExtractor={(g) => g.id} renderItem={renderItem} />
                 // <SwipeListView
@@ -125,7 +126,7 @@ export default function GroupsListScreen() {
                 <Text className="text-center text-gray-500">Không có nhóm</Text>
             )}
             <TouchableOpacity onPress={() => navigation.navigate("GroupForm", { type: 'add', groupData: { id: '', name: '', users: [], createdAt: '' } })} className="absolute right-6 bottom-8 w-14 h-14 bg-[#0F6BF0] rounded-full items-center justify-center shadow-lg">
-                <Text className="text-white text-2xl">+</Text>
+                <Text className="text-2xl" style={{ color: TEXT_COLOR }}>+</Text>
             </TouchableOpacity>
             <LoadingOverlay visible={loading} />
             <CustomModal

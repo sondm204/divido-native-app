@@ -13,6 +13,7 @@ import { User } from "../store/slices/userSlice";
 import { getUserByEmail } from "../store/slices/userSlice";
 import { Category } from "../store/slices/expensesSlice";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { BACKGROUND_COLOR, TEXT_COLOR, CARD_COLOR } from "../commons/constants";
 
 type GroupFormRouteProp = RouteProp<RootStackParamList, "GroupForm">;
 
@@ -160,10 +161,10 @@ export default function GroupFormScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 p-4">
-      <Text className="text-4xl font-bold mb-4 text-white text-center">{type === 'add' ? 'Tạo nhóm mới' : 'Chỉnh sửa nhóm'}</Text>
+    <SafeAreaView className="flex-1 p-4" style={{ backgroundColor: BACKGROUND_COLOR }}>
+      <Text className="text-4xl font-bold mb-4 text-center" style={{ color: TEXT_COLOR }}>{type === 'add' ? 'Tạo nhóm mới' : 'Chỉnh sửa nhóm'}</Text>
       <View className="mb-4">
-        <Text className="text-sm mb-2 text-white">Tên nhóm</Text>
+        <Text className="text-sm mb-2" style={{ color: TEXT_COLOR }}>Tên nhóm</Text>
         <AppInput
           value={formData.name}
           onChangeText={(text) => setFormData({ ...formData, name: text })}
@@ -173,7 +174,7 @@ export default function GroupFormScreen() {
 
 
       <View className="mb-4">
-        <Text className="text-sm text-white mb-2">Số lượng người</Text>
+        <Text className="text-sm mb-2" style={{ color: TEXT_COLOR }}>Số lượng người</Text>
         <AppInput
           value={formData.users?.length?.toString() || '0'}
           editable={false}
@@ -181,7 +182,7 @@ export default function GroupFormScreen() {
       </View>
 
       <View className="mb-4">
-        <Text className="text-sm text-white mb-2">Thành viên</Text>
+        <Text className="text-sm mb-2" style={{ color: TEXT_COLOR }}>Thành viên</Text>
         <View className="flex flex-col border border-slate-500 rounded-lg p-2 gap-2">
           <View className="flex-row gap-2 p-2 overflow-x-auto">
             {formData.users?.map((user) => {
@@ -192,8 +193,8 @@ export default function GroupFormScreen() {
                   onPress={() => !isCurrentUser && removeChooseUser(user.id)}
                   className={`rounded-full py-1 px-4 ${
                     isCurrentUser 
-                      ? "bg-gray-400 text-white" 
-                      : "bg-blue-500 text-white active:bg-red-500"
+                      ? "bg-gray-400" 
+                      : "bg-blue-500 active:bg-red-500"
                   }`}
                 >
                   {user.name} {isCurrentUser ? "(Bạn)" : ""}
@@ -212,10 +213,10 @@ export default function GroupFormScreen() {
               className="border border-slate-500 rounded-lg p-2 mb-2">
               <View className="flex flex-row gap-2 w-full">
                 <View className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-                  <Text className="text-white text-center">{searchUser?.name?.split(' ')[0]?.slice(0, 1)?.toUpperCase() || '?'}</Text>
+                  <Text className="text-center" style={{ color: TEXT_COLOR }}>{searchUser?.name?.split(' ')[0]?.slice(0, 1)?.toUpperCase() || '?'}</Text>
                 </View>
                 <View className="flex-1 flex flex-col gap-1">
-                  <Text className="text-sm font-bold text-white">{searchUser?.name}</Text>
+                  <Text className="text-sm font-bold" style={{ color: TEXT_COLOR }}>{searchUser?.name}</Text>
                   <Text className="text-xs text-slate-400">{searchUser?.email}</Text>
                 </View>
               </View>
@@ -226,13 +227,13 @@ export default function GroupFormScreen() {
 
       {type === 'edit' && (
         <View className="mb-4">
-          <Text className="text-sm text-white mb-2">Danh mục</Text>
+          <Text className="text-sm mb-2" style={{ color: TEXT_COLOR }}>Danh mục</Text>
         <View className="flex flex-col border border-slate-500 rounded-lg p-2 gap-2">
           <ScrollView className="p-2" horizontal showsHorizontalScrollIndicator={false}>
             {formData.categories?.map((category) => (
               <Text key={category.id}
                 onPress={() => handleRemoveCategory(category.id)}
-                className="bg-green-500 mx-[2px] text-white rounded-full py-1 px-4 active:bg-red-500">{category.name}</Text>
+                className="bg-green-500 mx-[2px] rounded-full py-1 px-4 active:bg-red-500" style={{ color: TEXT_COLOR }}>{category.name}</Text>
             ))}
             </ScrollView>
           {!isCategoryFormOpen ? (
@@ -252,7 +253,7 @@ export default function GroupFormScreen() {
                 <TouchableOpacity
                   onPress={handleAddCategory}
                   className="flex-1 bg-green-500 rounded-lg py-2">
-                  <Text className="text-white text-center font-medium">Thêm</Text>
+                  <Text className="text-center font-medium" style={{ color: TEXT_COLOR }}>Thêm</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
@@ -260,7 +261,7 @@ export default function GroupFormScreen() {
                     setNewCategoryName('');
                   }}
                   className="flex-1 bg-gray-500 rounded-lg py-2">
-                  <Text className="text-white text-center font-medium">Hủy</Text>
+                  <Text className="text-center font-medium" style={{ color: TEXT_COLOR }}>Hủy</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -270,7 +271,7 @@ export default function GroupFormScreen() {
       )}
 
       <View className="mb-4">
-        <Text className="text-sm text-white mb-2">Ngày tạo</Text>
+        <Text className="text-sm mb-2" style={{ color: TEXT_COLOR }}>Ngày tạo</Text>
         <AppInput
           value={formData.createdAt ? new Date(formData.createdAt).toLocaleDateString("vi-VN") : new Date().toLocaleDateString("vi-VN")}
           editable={false}

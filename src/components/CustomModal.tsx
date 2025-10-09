@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     width: '80%',
-    backgroundColor: '#fff',
+    backgroundColor: '#1e242e',
     borderRadius: 12,
     padding: 20,
   },
@@ -77,10 +77,10 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
-    color: '#333',
+    color: '#ffffff',
   },
   confirmButtonText: {
-    color: '#fff',
+    color: '#ffffff',
   },
 });
 
