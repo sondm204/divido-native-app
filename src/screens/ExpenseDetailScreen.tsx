@@ -131,11 +131,11 @@ export default function ExpenseDetailScreen() {
             <View className="flex-row items-center justify-between p-4 rounded-xl mb-4 shadow" style={{ backgroundColor: CARD_COLOR }}>
                 <View className="">
                     <Text className="text-base font-semibold mb-1" style={{ color: TEXT_COLOR }}>{expense?.note}</Text>
-                    <Text style={{ color: TEXT_COLOR}}>Người chi: {expense?.payer.name}</Text>
-                    <Text style={{ color: TEXT_COLOR}}>
+                    <Text style={{ color: TEXT_COLOR }}>Người chi: {expense?.payer.name}</Text>
+                    <Text style={{ color: TEXT_COLOR }}>
                         Ngày: {new Date(expense?.spentAt || "").toLocaleDateString("vi-VN")}
                     </Text>
-                    <Text style={{ color: TEXT_COLOR}}>Danh mục: {expense?.category.name}</Text>
+                    <Text style={{ color: TEXT_COLOR }}>Danh mục: {expense?.category.name}</Text>
                     <Text className="font-bold mt-2" style={{ color: TEXT_COLOR }}>
                         Tổng: {formatCurrency(expense?.amount || 0)}đ
                     </Text>
@@ -149,23 +149,25 @@ export default function ExpenseDetailScreen() {
                             const weight = normalized ? r : (totalRatio > 0 ? r / totalRatio : 0);
                             const shareAmount = Math.round(weight * amount);
                             return (
-                                <Text key={`${s.username}-${index}`} style={{ color: TEXT_COLOR}}>
+                                <Text key={`${s.username}-${index}`} style={{ color: TEXT_COLOR }}>
                                     {s.username}: {formatCurrency(shareAmount)}đ
                                 </Text>
                             );
                         });
                     })()}
                 </View>
-                <TouchableOpacity 
-                    onPress={() => setImageModalVisible(true)}
-                    className="h-36 w-24 overflow-hidden rounded-lg"
-                >
-                    <Image 
-                        source={{ uri: expense?.imageUrl }} 
-                        className="h-full w-full" 
-                        style={{ resizeMode: 'cover' }}
-                    />
-                </TouchableOpacity>
+                {expense?.imageUrl && (
+                    <TouchableOpacity
+                        onPress={() => setImageModalVisible(true)}
+                        className="h-36 w-24 overflow-hidden rounded-lg"
+                    >
+                        <Image
+                            source={{ uri: expense?.imageUrl }}
+                            className="h-full w-full"
+                            style={{ resizeMode: 'cover' }}
+                        />
+                    </TouchableOpacity>
+                )}
             </View>
 
             {/* Bảng chi tiết bill */}
@@ -270,7 +272,7 @@ export default function ExpenseDetailScreen() {
                     </View>
                 </View>
             </CustomModal>
-            
+
             {/* Image Modal */}
             <Modal
                 visible={imageModalVisible}
@@ -279,25 +281,25 @@ export default function ExpenseDetailScreen() {
                 onRequestClose={() => setImageModalVisible(false)}
             >
                 <View className="flex-1 bg-black/90 justify-center items-center">
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         className="absolute top-12 right-4 z-10"
                         onPress={() => setImageModalVisible(false)}
                     >
                         <Text className="text-lg font-bold" style={{ color: TEXT_COLOR }}>✕</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         className="flex-1 w-full justify-center items-center"
                         onPress={() => setImageModalVisible(false)}
                     >
-                        <Image 
-                            source={{ uri: expense?.imageUrl }} 
+                        <Image
+                            source={{ uri: expense?.imageUrl }}
                             className="w-full h-4/5"
                             style={{ resizeMode: 'contain' }}
                         />
                     </TouchableOpacity>
                 </View>
             </Modal>
-            
+
             <LoadingOverlay visible={loading} />
         </SafeAreaView>
     );
