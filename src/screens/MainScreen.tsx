@@ -6,6 +6,7 @@ import { CurvedBottomBar } from "react-native-curved-bottom-bar";
 import GroupsListScreen from "./GroupListScreen";
 import { BACKGROUND_COLOR, CARD_COLOR, TEXT_COLOR } from "../commons/constants";
 import { ChartBar, House, Plus, UserRound, Wallet } from "lucide-react-native";
+import { HomeScreen } from "./HomeScreen";
 
 type RootStackParamList = {
     GroupForm: { type: string; groupData: object };
@@ -14,13 +15,6 @@ type RootStackParamList = {
     GroupList: undefined;
     Profile: undefined;
 };
-
-// --- Placeholder Screens ---
-const HomeScreen: React.FC = () => (
-    <View style={styles.screen}>
-        <Text style={styles.text}>Home Screen</Text>
-    </View>
-);
 
 const DashboardScreen: React.FC = () => (
     <View style={styles.screen}>
