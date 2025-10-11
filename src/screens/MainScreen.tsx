@@ -19,7 +19,7 @@ type RootStackParamList = {
 
 const DashboardScreen: React.FC = () => (
     <View style={styles.screen}>
-        <Text style={styles.text} className="w-2/3 text-center">Chức năng đang trong quá trình phát triển!</Text>
+        <Text style={styles.text} className="w-2/3 text-center">Tính năng đang trong quá trình phát triển!</Text>
     </View>
 );
 
