@@ -5,6 +5,7 @@ export const AppSectionCard: React.FC<{
     title?: string;
     children: React.ReactNode;
     extra?: React.ReactNode;
+    className?: string;
   }> = ({ title, children, extra }) => (
     <View className="rounded-2xl p-4 shadow-sm mb-4" style={{ backgroundColor: CARD_COLOR  }}>
       {!!title && (
