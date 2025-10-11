@@ -7,6 +7,7 @@ import GroupsListScreen from "./GroupListScreen";
 import { BACKGROUND_COLOR, CARD_COLOR, TEXT_COLOR } from "../commons/constants";
 import { ChartBar, House, Plus, UserRound, Wallet } from "lucide-react-native";
 import { HomeScreen } from "./HomeScreen";
+import AccountScreen from "./AccountScreen";
 
 type RootStackParamList = {
     GroupForm: { type: string; groupData: object };
@@ -18,13 +19,7 @@ type RootStackParamList = {
 
 const DashboardScreen: React.FC = () => (
     <View style={styles.screen}>
-        <Text style={styles.text}>Dashboard Screen</Text>
-    </View>
-);
-
-const ProfileScreen: React.FC = () => (
-    <View style={styles.screen}>
-        <Text style={styles.text}>Profile Screen</Text>
+        <Text style={styles.text} className="w-2/3 text-center">Chức năng đang trong quá trình phát triển!</Text>
     </View>
 );
 
@@ -66,7 +61,7 @@ export default function MainScreen() {
                 return <ChartBar size={24} color={color} />;
             case "GroupList":
                 return <Wallet size={24} color={color} />;
-            case "Profile":
+            case "Account":
                 return <UserRound size={24} color={color} />;
             default:
                 return null;
@@ -101,7 +96,7 @@ export default function MainScreen() {
             <CurvedScreen name="Home" position="LEFT" component={HomeScreen} />
             <CurvedScreen name="GroupList" position="LEFT" component={GroupsListScreen} />
             <CurvedScreen name="Dashboard" position="RIGHT" component={DashboardScreen} />
-            <CurvedScreen name="Profile" position="RIGHT" component={ProfileScreen} />
+            <CurvedScreen name="Account" position="RIGHT" component={AccountScreen} />
         </CurvedNavigator>
     );
 }
