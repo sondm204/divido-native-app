@@ -64,6 +64,7 @@ export const HomeScreen = () => {
                             </View>
                         ))}
                     </View>
+                    
                 </AppSectionCard>
                 <AppSectionCard>
                     <Text className="text-lg font-semibold mb-4" style={{ color: TEXT_COLOR }}>Thống kê tháng này</Text>

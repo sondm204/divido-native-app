@@ -62,15 +62,22 @@ export const emailVerification = createAsyncThunk(
   "emailVerification",
   async (params: { email: string }, { rejectWithValue }) => {
     try {
-      const response = await request({
-        url: `${AUTH_SERVICE_URL}/email-verification`,
+      // const response = await request({
+      //   url: `${AUTH_SERVICE_URL}/email-verification`,
+      //   method: "POST",
+      //   data: params,
+      // });
+      const response = await fetch(`${AUTH_SERVICE_URL}/email-verification`, {
         method: "POST",
-        data: params,
+        body: JSON.stringify(params),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         throw new Error("Email verification failed");
       }
-      return response.data as any;
+      return response.json() as Promise<any>;
     } catch (error) {
       return rejectWithValue("Failed to email verification:" + error);
     }
@@ -81,15 +88,18 @@ export const verifyEmail = createAsyncThunk(
   "verifyEmail",
   async (params: { email: string; code: string }, { rejectWithValue }) => {
     try {
-      const response = await request({
-        url: `${AUTH_SERVICE_URL}/verify-email`,
+      const response = await fetch(`${AUTH_SERVICE_URL}/verify-email`, {
         method: "POST",
-        data: params,
+        body: JSON.stringify(params),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         throw new Error("Verify email failed");
       }
-      return response.data as any;
+      const data = await response.json() as any;
+      return data.data as any;
     } catch (error) {
       return rejectWithValue("Failed to verify code:" + error);
     }
@@ -104,18 +114,19 @@ export const register = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await request({
-        url: `${AUTH_SERVICE_URL}/register`,
+      const response = await fetch(`${AUTH_SERVICE_URL}/register`, {
         method: "POST",
-        data: params,
+        body: JSON.stringify(params),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-
-      if (response.status !== 200) {
+      if (!response.ok) {
         throw new Error("Register failed");
       }
 
-      const data = await response.data as any;
-      return data.user; // chỉ lấy user
+      const data = await response.json() as any;
+      return data.data as any; // chỉ lấy user
     } catch (error) {
       return rejectWithValue("Failed to register");
     }
