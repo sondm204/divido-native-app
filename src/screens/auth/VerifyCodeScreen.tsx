@@ -31,7 +31,7 @@ export default function VerifyCodeScreen() {
 
         try {
             const response = await dispatch(verifyEmail({ email, code }));
-            navigation.navigate("Register", { email, verificationToken: response.payload.data });
+            navigation.navigate("Register", { email, verificationToken: response.payload });
         } catch (err) {
             alert("Mã không đúng hoặc đã hết hạn");
         } finally {

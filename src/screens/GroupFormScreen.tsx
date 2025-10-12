@@ -26,6 +26,7 @@ export default function GroupFormScreen() {
   const [formData, setFormData] = useState<Group>(
     groupData ? {
       ...groupData,
+      users: groupData.users || [],
       categories: groupData.categories || [],
       createdAt: groupData.createdAt || new Date().toISOString()
     } : {

@@ -31,20 +31,20 @@ export default function RegisterScreen() {
     const dispatch = useDispatch<AppDispatch>();
 
     async function handleRegister() {
-        if (!name || !email || !password || !confirmPassword) {
+        if (!name || !password || !confirmPassword) {
             alert("Vui lòng nhập đầy đủ thông tin");
-            return;
-        }
-        if (!email.endsWith("@gmail.com")) {
-            alert("Email phải kết thúc bằng @gmail.com");
             return;
         }
         if (password !== confirmPassword) {
             alert("Mật khẩu nhập lại không khớp");
             return;
         }
-        const resultAction = await dispatch(register({ name, email, password, verificationToken }));
-        navigation.replace("Login");
+        try {
+            await dispatch(register({ name, email, password, verificationToken }));
+            navigation.replace("Login");
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     return (
