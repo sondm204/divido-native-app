@@ -14,6 +14,7 @@ import { getUserByEmail } from "../store/slices/userSlice";
 import { Category } from "../store/slices/expensesSlice";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BACKGROUND_COLOR, TEXT_COLOR, CARD_COLOR } from "../commons/constants";
+import { Mixpanel } from "../utils/mixpanel";
 
 type GroupFormRouteProp = RouteProp<RootStackParamList, "GroupForm">;
 
@@ -54,6 +55,10 @@ export default function GroupFormScreen() {
       }
     }
   }, [currentUser, type]);
+
+  useEffect(() => {
+    Mixpanel.trackScreenView("GroupForm");
+  }, []);
 
   function checkEmailSuffix(text: string) {
     const regex = /@(gmail\.com|yahoo\.com|outlook\.com)$/;

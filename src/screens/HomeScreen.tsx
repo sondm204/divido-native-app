@@ -6,6 +6,8 @@ import { AppSectionCard } from "../components/AppSectionCard";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { LineChart } from "react-native-gifted-charts"
+import { Mixpanel } from "../utils/mixpanel";
+import { useEffect } from "react";
 
 export const HomeScreen = () => {
 
@@ -30,6 +32,10 @@ export const HomeScreen = () => {
         { value: 2700000 },
         { value: 2900000, },
     ];
+
+    useEffect(() => {
+        Mixpanel.trackScreenView("Home");
+    }, []);
 
     return (
         <SafeAreaView style={{ backgroundColor: BACKGROUND_COLOR, flex: 1 }}>

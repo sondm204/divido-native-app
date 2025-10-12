@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons"; // icon gọn gàng
+import { Mixpanel } from "../utils/mixpanel";
 
 export default function AccountScreen() {
   const menuItems = [
@@ -13,6 +14,10 @@ export default function AccountScreen() {
     { icon: "receipt-outline", label: "Hóa đơn" },
     { icon: "log-out-outline", label: "Đăng xuất" },
   ];
+
+  useEffect(() => {
+    Mixpanel.trackScreenView("Account");
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-black">

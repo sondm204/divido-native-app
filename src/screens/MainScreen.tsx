@@ -8,6 +8,7 @@ import { BACKGROUND_COLOR, CARD_COLOR, TEXT_COLOR } from "../commons/constants";
 import { ChartBar, House, Plus, UserRound, Wallet } from "lucide-react-native";
 import { HomeScreen } from "./HomeScreen";
 import AccountScreen from "./AccountScreen";
+import { Mixpanel } from "../utils/mixpanel";
 
 type RootStackParamList = {
     GroupForm: { type: string; groupData: object };
@@ -31,15 +32,16 @@ export default function MainScreen() {
     const _renderCircle = () => (
         <TouchableOpacity
             style={styles.fab}
-            onPress={() =>
+            onPress={() => {
                 navigation.navigate("GroupForm", {
                     type: "add",
                     groupData: {},
                 })
-            }
+                Mixpanel.track("Click Add Group Button", {});
+            }}
         >
             <Plus size={24} color="#fff" />
-        </TouchableOpacity>
+        </TouchableOpacity >
     );
 
     // 🧩 Type của props renderIcon & tabBar

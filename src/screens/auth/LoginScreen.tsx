@@ -37,8 +37,8 @@ export default function LoginScreen() {
             if (login.fulfilled.match(resultAction)) {
                 // Login thành công
                 Mixpanel.track("Login Success", {});
-                // navigation.replace("MainScreen");
-                navigation.navigate("SurveyScreen");
+                navigation.replace("MainScreen");
+                // navigation.navigate("SurveyScreen");
             } else {
                 // Login thất bại, có thể lấy lỗi
                 const errorMsg = resultAction.payload || "Login failed MESS";
