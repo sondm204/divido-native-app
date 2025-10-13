@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { USER_SERVICE_URL } from "../../commons/constants";
+import { API_BASE_URL, USER_SERVICE_URL } from "../../commons/constants";
 import { request } from "@/src/utils/callApi";
 
 export interface User {
@@ -53,6 +53,16 @@ export const fetchCurrentUser = createAsyncThunk(
 export const getUserByEmail = async (params: { email: string }) => {
     const endpoint = `${USER_SERVICE_URL}/email/${params.email}`;
 
+    const response = await request({
+        url: endpoint,
+        method: 'GET',
+    });
+    const data = await response.data as any;
+    return data;
+}
+
+export const getTotalAmount = async (params: { userId: string }) => {
+    const endpoint = `${USER_SERVICE_URL}/${params.userId}/total-amount`;
     const response = await request({
         url: endpoint,
         method: 'GET',

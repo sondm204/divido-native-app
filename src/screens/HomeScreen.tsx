@@ -3,15 +3,25 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BACKGROUND_COLOR, TEXT_COLOR } from "../commons/constants";
 import { Bell, BusFront, Hamburger, HeartPulse } from "lucide-react-native";
 import { AppSectionCard } from "../components/AppSectionCard";
-import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store/store";
 import { LineChart } from "react-native-gifted-charts"
 import { Mixpanel } from "../utils/mixpanel";
 import { useEffect } from "react";
+import { fetchGroups } from "../store/slices/groupsSlice";
+import { fetchTotalAmount } from "../store/slices/authSlice";
+
 
 export const HomeScreen = () => {
 
     const groups = useSelector((state: RootState) => state.groups.groups);
+    const dispatch = useDispatch<AppDispatch>();
+    const currentUser = useSelector((state: RootState) => state.auth.currentUser);
+
+    useEffect(() => {
+        dispatch(fetchGroups());
+        dispatch(fetchTotalAmount({}));
+    }, []);
 
     const thisMonth = [
         { value: 0, label: '01/10' },
@@ -42,7 +52,7 @@ export const HomeScreen = () => {
             <ScrollView className="flex-1 px-4" contentContainerStyle={{ gap: 16, paddingBottom: 100 }}>
                 <View className="flex-row justify-between items-start">
                     <View className="flex gap-2">
-                        <Text className="text-3xl font-bold" style={{ color: TEXT_COLOR }}>1,319,000 đ</Text>
+                        <Text className="text-3xl font-bold" style={{ color: TEXT_COLOR }}>{currentUser?.totalAmount?.toLocaleString('vi-VN')} đ</Text>
                         <Text className="text-md text-gray-500">Tổng chi tiêu</Text>
                     </View>
                     <View className="mt-2">
@@ -66,11 +76,14 @@ export const HomeScreen = () => {
                                     </View>
                                     <Text className="text-lg font-semibold" style={{ color: TEXT_COLOR }}>{group.name}</Text>
                                 </View>
-                                <Text className="text-lg font-semibold" style={{ color: TEXT_COLOR }}>1,319,000 đ</Text>
+                                <View className="flex gap-2 items-end">
+                                    <Text className="text-lg font-semibold" style={{ color: TEXT_COLOR }}>{group.totalUserAmount?.toLocaleString('vi-VN')} đ</Text>
+                                    <Text className="text-sm text-gray-500" >Tổng: {group.totalAmount?.toLocaleString('vi-VN')} đ</Text>
+                                </View>
                             </View>
                         ))}
                     </View>
-                    
+
                 </AppSectionCard>
                 <AppSectionCard>
                     <Text className="text-lg font-semibold mb-4" style={{ color: TEXT_COLOR }}>Thống kê tháng này</Text>

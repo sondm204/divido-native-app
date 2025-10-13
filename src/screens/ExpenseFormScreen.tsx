@@ -16,7 +16,7 @@ import AppInput from "../components/AppInput";
 import AppButton from "../components/AppButton";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store/store";
-import { fetchExpenses, fetchGroupCategories, fetchGroupMembers, postCreateExpense, putUpdateExpense } from "../store/slices/groupsSlice";
+import { fetchExpenses, fetchGroupCategories, fetchGroupMembers, fetchGroups, postCreateExpense, putUpdateExpense } from "../store/slices/groupsSlice";
 import { AppChip } from "../components/AppChip";
 import { BACKGROUND_COLOR, TEXT_COLOR, CARD_COLOR, PLACEHOLDER_COLOR } from "../commons/constants";
 import { AppAvatar } from "../components/AppAvatar";
@@ -25,6 +25,7 @@ import { User } from "../store/slices/userSlice";
 import { Category } from "../store/slices/expensesSlice";
 import { uploadImage } from "../api/uploadService";
 import * as ImagePicker from 'expo-image-picker';
+import { fetchTotalAmount } from "../store/slices/authSlice";
 
 type ID = string;
 
@@ -250,6 +251,8 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
 
       await dispatch(fetchExpenses(groupId));
       setLoading(false);
+      dispatch(fetchTotalAmount({}));
+      dispatch(fetchGroups());
       navigation.goBack();
     } catch (e: any) {
       setLoading(false);

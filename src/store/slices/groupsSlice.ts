@@ -14,6 +14,8 @@ export interface Group {
   categories?: Category[];
   expenses?: Expense[];
   createdAt: string;
+  totalAmount: number;
+  totalUserAmount: number;
 }
 
 interface GroupsState {
