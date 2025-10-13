@@ -3,8 +3,30 @@ import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons"; // icon gọn gàng
 import { Mixpanel } from "../utils/mixpanel";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useDispatch } from "react-redux";
+import { logout } from "../store/slices/authSlice";
+import { removeToken } from "../utils/utils";
+import { RootStackParamList } from "../../App";
 
 export default function AccountScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const dispatch = useDispatch();
+
+  const handleLogout = async () => {
+    try {
+      await removeToken();
+      dispatch(logout());
+      Mixpanel.track("Logout", {})
+      navigation.replace("Login");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      dispatch(logout());
+      navigation.replace("Login");
+    }
+  };
+
   const menuItems = [
     { icon: "wallet-outline", label: "Ví của tôi" },
     { icon: "people-outline", label: "Nhóm" },
@@ -12,12 +34,14 @@ export default function AccountScreen() {
     { icon: "calendar-outline", label: "Sự kiện" },
     { icon: "repeat-outline", label: "Giao dịch định kì" },
     { icon: "receipt-outline", label: "Hóa đơn" },
-    { icon: "log-out-outline", label: "Đăng xuất" },
+    { icon: "log-out-outline", label: "Đăng xuất", onPress: handleLogout },
   ];
 
   useEffect(() => {
     Mixpanel.trackScreenView("Account");
   }, []);
+
+  
 
   return (
     <SafeAreaView className="flex-1 bg-black">
@@ -67,6 +91,7 @@ export default function AccountScreen() {
           {menuItems.map((item, index) => (
             <TouchableOpacity
               key={index}
+              onPress={item.onPress}
               className="flex-row items-center justify-between px-5 py-4 border-b border-gray-800"
               activeOpacity={0.8}
             >
@@ -79,42 +104,6 @@ export default function AccountScreen() {
           ))}
         </View>
       </ScrollView>
-
-      {/* BOTTOM TAB BAR */}
-      <View className="flex-row justify-between items-center bg-black border-t border-gray-800 px-4 py-2">
-        <TabItem icon="home-outline" label="Tổng quan" />
-        <TabItem icon="wallet-outline" label="Sổ giao dịch" />
-        <TouchableOpacity className="bg-green-500 p-3 rounded-full -mt-8 shadow-lg">
-          <Ionicons name="add" size={28} color="white" />
-        </TouchableOpacity>
-        <TabItem icon="briefcase-outline" label="Ngân sách" />
-        <TabItem icon="person-outline" label="Tài khoản" active />
-      </View>
     </SafeAreaView>
   );
 }
-
-const TabItem = ({
-  icon,
-  label,
-  active,
-}: {
-  icon: string;
-  label: string;
-  active?: boolean;
-}) => (
-  <TouchableOpacity className="items-center flex-1">
-    <Ionicons
-      name={icon as any}
-      size={22}
-      color={active ? "#22c55e" : "#aaa"}
-    />
-    <Text
-      className={`text-xs mt-1 ${
-        active ? "text-green-500 font-semibold" : "text-gray-400"
-      }`}
-    >
-      {label}
-    </Text>
-  </TouchableOpacity>
-);
