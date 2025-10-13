@@ -40,7 +40,9 @@ export default function GroupsListScreen() {
     useEffect(() => {
         Mixpanel.trackScreenView("GroupsList");
         Mixpanel.timeEvent("Fetch Groups Duration");
-        dispatch(fetchGroups());
+        if (groups.length === 0) {
+            dispatch(fetchGroups());
+        }
     }, [dispatch]);
 
     function handleDelete(groupId: string) {
@@ -84,11 +86,15 @@ export default function GroupsListScreen() {
                             <Text className="font-bold text-lg" style={{ color: TEXT_COLOR }}>
                                 {item.name}
                             </Text>
-                            <Text className="text-sm text-slate-500 mt-0.5">{item.users?.length} thành viên</Text>
-                            {/* {item.users && (
-                                <Text className="text-sm text-slate-500 mt-0.5">{item.users.map((user) => user.name).join(", ")}</Text>
-                            )} */}
-                            <Text className="text-sm text-right text-slate-500 mt-0.5">{formatDate(item.createdAt)}</Text>
+                            <View className="flex-row items-center justify-between">
+                                <Text className="text-sm text-slate-500 mt-0.5">{item.users?.length} thành viên</Text>
+                                <Text className="text-md font-semibold text-right mt-0.5" style={{ color: TEXT_COLOR }}>{item.totalUserAmount?.toLocaleString('vi-VN')} đ</Text>
+
+                            </View>
+                            <View className="flex-row items-center justify-between">
+                                <Text className="text-sm text-right text-slate-500 mt-0.5">{formatDate(item.createdAt)}</Text>
+                                <Text className="text-sm text-right text-slate-500 mt-0.5">Tổng: {item.totalAmount?.toLocaleString('vi-VN')} đ</Text>
+                            </View>
                         </View>
                     </View>
                     <TouchableOpacity
@@ -113,21 +119,9 @@ export default function GroupsListScreen() {
             <Text className="text-4xl font-bold mb-4 text-center" style={{ color: TEXT_COLOR }}>Nhóm</Text>
             {groups.length > 0 ? (
                 <FlatList data={groups} keyExtractor={(g) => g.id} renderItem={renderItem} />
-                // <SwipeListView
-                //     data={groups}
-                //     keyExtractor={(g) => (g?.id ? String(g.id) : `${g.name}-${g.createdAt}`)}
-                //     renderItem={renderItem}
-                //     renderHiddenItem={renderHiddenItem}
-                //     leftOpenValue={0}
-                //     rightOpenValue={-100} 
-                //     disableRightSwipe={true}
-                // />
             ) : (
                 <Text className="text-center text-gray-500">Không có nhóm</Text>
             )}
-            <TouchableOpacity onPress={() => navigation.navigate("GroupForm", { type: 'add', groupData: { id: '', name: '', users: [], createdAt: '' } })} className="absolute right-6 bottom-8 w-14 h-14 bg-[#0F6BF0] rounded-full items-center justify-center shadow-lg">
-                <Text className="text-2xl" style={{ color: TEXT_COLOR }}>+</Text>
-            </TouchableOpacity>
             <LoadingOverlay visible={loading} />
             <CustomModal
                 visible={confirmVisible}
@@ -135,7 +129,7 @@ export default function GroupsListScreen() {
                 onConfirm={() => { if (pendingDeleteId) { handleDelete(pendingDeleteId); } }}
                 confirmText="Xóa"
             >
-                <Text>Bạn có chắc muốn xóa nhóm này?</Text>
+                <Text style={{ color: TEXT_COLOR }}>Bạn có chắc muốn xóa nhóm này?</Text>
             </CustomModal>
         </SafeAreaView>
     );

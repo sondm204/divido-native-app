@@ -3,12 +3,14 @@ import { AUTH_SERVICE_URL } from "../../commons/constants";
 import { removeToken, storeToken } from "@/src/utils/utils";
 import { request } from "@/src/utils/callApi";
 import { Mixpanel } from "@/src/utils/mixpanel";
+import { getTotalAmount } from "./userSlice";
 
 // Kiểu dữ liệu user
 export interface User {
   id: string;
   name: string;
   email: string;
+  totalAmount?: number;
 }
 
 export interface LoginResponse {  
@@ -133,6 +135,16 @@ export const register = createAsyncThunk(
   }
 );
 
+export const fetchTotalAmount = createAsyncThunk(
+  "fetchTotalAmount",
+  async (params: {}, { rejectWithValue, getState }) => {
+    const state = getState() as { auth: AuthState };
+    const currentUser = state.auth.currentUser;
+    const data = await getTotalAmount({ userId: currentUser?.id || '' });
+    return data.data;
+  }
+);
+
 export const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -185,6 +197,11 @@ export const authSlice = createSlice({
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      });
+    // FETCH TOTAL AMOUNT
+    builder
+      .addCase(fetchTotalAmount.fulfilled, (state, action) => {
+        state.currentUser!.totalAmount = action.payload;
       });
   },
 });
