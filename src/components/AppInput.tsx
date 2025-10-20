@@ -14,7 +14,7 @@ export default function AppInput({ label, error, className, style, ...props }: A
       {label && <Text className="text-sm text-slate-600 mb-2">{label}</Text>}
       <TextInput
         {...props}
-        className={`rounded-xl border p-3 ${className} ${
+        className={`rounded-xl border p-3 h-12 ${className} ${
           error ? "border-red-500" : "border-slate-700"
         }`}
         style={[

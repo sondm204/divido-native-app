@@ -34,7 +34,9 @@ export default function GroupFormScreen() {
       id: "",
       name: "",
       users: currentUser ? [currentUser] : [],
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      totalAmount: 0,
+      totalUserAmount: 0
     }
   );
   const [isOpenDropDown, setIsOpenDropDown] = useState(false);
