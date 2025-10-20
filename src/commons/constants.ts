@@ -14,3 +14,4 @@ export const BACKGROUND_COLOR = '#0f0f0f';
 export const TEXT_COLOR = '#ffffff';
 export const PLACEHOLDER_COLOR = '#9da7b6';
 export const CARD_COLOR = '#1e242e';
+export const ERROR_COLOR = '#ff0000';
