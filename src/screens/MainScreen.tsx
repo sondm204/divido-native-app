@@ -9,20 +9,15 @@ import { ChartBar, House, Plus, UserRound, Wallet } from "lucide-react-native";
 import { HomeScreen } from "./HomeScreen";
 import AccountScreen from "./AccountScreen";
 import { Mixpanel } from "../utils/mixpanel";
+import { FeaturesScreen } from "./FeaturesScreen";
 
 type RootStackParamList = {
     GroupForm: { type: string; groupData: object };
     Home: undefined;
-    Dashboard: undefined;
+    Features: undefined;
     GroupList: undefined;
     Profile: undefined;
 };
-
-const DashboardScreen: React.FC = () => (
-    <View style={styles.screen}>
-        <Text style={styles.text} className="w-2/3 text-center">Tính năng đang trong quá trình phát triển!</Text>
-    </View>
-);
 
 // --- Main Screen ---
 export default function MainScreen() {
@@ -59,7 +54,7 @@ export default function MainScreen() {
         switch (routeName) {
             case "Home":
                 return <House size={24} color={color} />;
-            case "Dashboard":
+            case "Features":
                 return <ChartBar size={24} color={color} />;
             case "GroupList":
                 return <Wallet size={24} color={color} />;
@@ -97,7 +92,7 @@ export default function MainScreen() {
         >
             <CurvedScreen name="Home" position="LEFT" component={HomeScreen} />
             <CurvedScreen name="GroupList" position="LEFT" component={GroupsListScreen} />
-            <CurvedScreen name="Dashboard" position="RIGHT" component={DashboardScreen} />
+            <CurvedScreen name="Features" position="RIGHT" component={FeaturesScreen} />
             <CurvedScreen name="Account" position="RIGHT" component={AccountScreen} />
         </CurvedNavigator>
     );
