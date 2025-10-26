@@ -72,6 +72,16 @@ export const getTotalAmount = async (params: { userId: string }) => {
 }
 
 
+export const getCategoryStatistics = async (params: { userId: string }) => {
+    const endpoint = `${USER_SERVICE_URL}/${params.userId}/category-statistics`;
+    const response = await request({
+        url: endpoint,
+        method: 'GET',
+    });
+    const data = await response.data as any;
+    return data;
+}
+
 export const { setCurrentUser } = userSlice.actions;
 
 export default userSlice.reducer;

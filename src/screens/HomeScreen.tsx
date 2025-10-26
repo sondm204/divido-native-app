@@ -9,7 +9,7 @@ import { LineChart } from "react-native-gifted-charts"
 import { Mixpanel } from "../utils/mixpanel";
 import { useEffect } from "react";
 import { fetchGroups } from "../store/slices/groupsSlice";
-import { fetchTotalAmount } from "../store/slices/authSlice";
+import { fetchCategoryStatistics, fetchTotalAmount } from "../store/slices/authSlice";
 
 
 export const HomeScreen = () => {
@@ -21,6 +21,7 @@ export const HomeScreen = () => {
     useEffect(() => {
         dispatch(fetchGroups());
         dispatch(fetchTotalAmount({}));
+        dispatch(fetchCategoryStatistics({}));
     }, []);
 
     const thisMonth = [
@@ -145,42 +146,20 @@ export const HomeScreen = () => {
                 <AppSectionCard>
                     <Text className="text-lg font-semibold mb-4" style={{ color: TEXT_COLOR }}>Chi tiêu nhiều nhất</Text>
                     <View className="flex gap-4 border-t border-gray-700 pt-4">
-                        <View className="flex-row justify-between items-center">
+                        {currentUser?.categoryStatistics?.map((category) => (
+                            <View key={category.categoryName} className="flex-row justify-between items-center">
                             <View className="flex-row gap-2 items-center">
                                 <View className="w-12 h-12 rounded-full bg-slate-600 mr-3 items-center justify-center">
                                     <HeartPulse size={24} color={TEXT_COLOR} />
                                 </View>
                                 <View className="flex">
-                                    <Text className="text-lg font-semibold" style={{ color: TEXT_COLOR }}>Sức khỏe</Text>
-                                    <Text className="text-sm text-gray-500">569,000 đ</Text>
+                                    <Text className="text-lg font-semibold" style={{ color: TEXT_COLOR }}>{category.categoryName}</Text>
+                                    <Text className="text-sm text-gray-500">{category.total.toLocaleString('vi-VN')} đ</Text>
                                 </View>
                             </View>
-                            <Text className="text-lg font-semibold" style={{ color: 'red' }}>48%</Text>
+                            <Text className="text-lg font-semibold" style={{ color: 'red' }}>{category.percentage}%</Text>
                         </View>
-                        <View className="flex-row justify-between items-center">
-                            <View className="flex-row gap-2 items-center">
-                                <View className="w-12 h-12 rounded-full bg-slate-600 mr-3 items-center justify-center">
-                                    <Hamburger size={24} color={TEXT_COLOR} />
-                                </View>
-                                <View className="flex">
-                                    <Text className="text-lg font-semibold" style={{ color: TEXT_COLOR }}>Ăn uống</Text>
-                                    <Text className="text-sm text-gray-500">462,000 đ</Text>
-                                </View>
-                            </View>
-                            <Text className="text-lg font-semibold" style={{ color: 'red' }}>39%</Text>
-                        </View>
-                        <View className="flex-row justify-between items-center">
-                            <View className="flex-row gap-2 items-center">
-                                <View className="w-12 h-12 rounded-full bg-slate-600 mr-3 items-center justify-center">
-                                    <BusFront size={24} color={TEXT_COLOR} />
-                                </View>
-                                <View className="flex">
-                                    <Text className="text-lg font-semibold" style={{ color: TEXT_COLOR }}>Di chuyển</Text>
-                                    <Text className="text-sm text-gray-500">130,000 đ</Text>
-                                </View>
-                            </View>
-                            <Text className="text-lg font-semibold" style={{ color: 'red' }}>11%</Text>
-                        </View>
+                        ))}
                     </View>
                 </AppSectionCard>
             </ScrollView>

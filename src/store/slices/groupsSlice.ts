@@ -94,10 +94,24 @@ export const deleteGroup = createAsyncThunk(
 
 export const fetchExpenses = createAsyncThunk(
   "groups/fetchExpenses",
-  async (groupId: string, { rejectWithValue }) => {
+  async ({ groupId, month, year }: { groupId: string; month?: number; year?: number }, { rejectWithValue }) => {
     try {
+      let url = `${GROUP_SERVICE_URL}/${groupId}/expenses`;
+      const params = new URLSearchParams();
+      
+      if (month !== undefined) {
+        params.append('month', month.toString());
+      }
+      if (year !== undefined) {
+        params.append('year', year.toString());
+      }
+      
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+      
       const response = await request({
-        url: `${GROUP_SERVICE_URL}/${groupId}/expenses`,
+        url,
         method: "GET",
       });
       const data = await response.data as Expense[];

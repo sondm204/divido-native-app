@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FlatList, SectionList, TouchableOpacity, Text, View } from "react-native";
+import { FlatList, SectionList, TouchableOpacity, Text, View, ScrollView } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
@@ -17,6 +17,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "GroupDetail">;
 export default function GroupDetailScreen({ navigation, route }: Props) {
   const { groupId } = route.params;
   const dispatch = useDispatch<AppDispatch>();
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
 
   const groups = useSelector((state: RootState) => state.groups.groups);
   const group = groups.find((g) => g.id === groupId) as Group | undefined;
@@ -32,6 +33,20 @@ export default function GroupDetailScreen({ navigation, route }: Props) {
     const day = String(d.getDate()).padStart(2, "0");
     return `${y}-${m}-${day}`;
   }
+
+  const months = useMemo(() => {
+    const monthsList = [];
+    const currentDate = new Date();
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      monthsList.push(date);
+    }
+    return monthsList;
+  }, []);
+
+  const totalAmount = useMemo(() => {
+    return expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  }, [expenses]);
 
   const sections = useMemo(() => {
     if (!expenses || expenses.length === 0) return [] as { title: string; data: Expense[] }[];
@@ -55,12 +70,14 @@ export default function GroupDetailScreen({ navigation, route }: Props) {
   }, [expenses]);
 
   useEffect(() => {
-    if (!expenses || expenses.length === 0) {
-      dispatch(fetchExpenses(groupId));
-    }
+    dispatch(fetchExpenses({ 
+      groupId, 
+      month: selectedMonth.getMonth() + 1, 
+      year: selectedMonth.getFullYear() 
+    }));
     // Fetch categories for the group
     dispatch(fetchGroupCategories(groupId));
-  }, [dispatch, groupId, expenses?.length]);
+  }, [dispatch, groupId, selectedMonth]);
 
 
   function goCreateExpense() {
@@ -121,6 +138,55 @@ export default function GroupDetailScreen({ navigation, route }: Props) {
         >
           <SquarePen color={"#FFFFFF"} />
         </TouchableOpacity>
+      </View>
+
+      {/* Month Selector */}
+      <View className="px-4 py-3" style={{ backgroundColor: CARD_COLOR }}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 8 }}
+        >
+          {months.map((month, index) => {
+            const isSelected = month.getMonth() === selectedMonth.getMonth() && 
+                              month.getFullYear() === selectedMonth.getFullYear();
+            const monthNames = [
+              "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+              "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+            ];
+            
+            return (
+              <TouchableOpacity
+                key={index}
+                onPress={() => setSelectedMonth(month)}
+                className={`px-4 py-2 mx-1 rounded-lg ${
+                  isSelected ? 'bg-[#0F6BF0]' : 'bg-slate-600'
+                }`}
+              >
+                <Text 
+                  className={`font-semibold ${isSelected ? 'text-white' : 'text-slate-300'}`}
+                  style={{ color: isSelected ? '#FFFFFF' : '#CBD5E1' }}
+                >
+                  {monthNames[month.getMonth()]}
+                </Text>
+                <Text 
+                  className={`text-xs ${isSelected ? 'text-white' : 'text-slate-400'}`}
+                  style={{ color: isSelected ? '#FFFFFF' : '#94A3B8' }}
+                >
+                  {month.getFullYear()}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+        
+        {/* Total Amount Display */}
+        <View className="mt-3 p-3 rounded-lg" style={{ backgroundColor: '#1E293B' }}>
+          <Text className="text-slate-300 text-sm">Tổng chi tiêu tháng này</Text>
+          <Text className="text-2xl font-bold mt-1" style={{ color: TEXT_COLOR }}>
+            ₫{totalAmount.toLocaleString()}
+          </Text>
+        </View>
       </View>
 
       <SectionList

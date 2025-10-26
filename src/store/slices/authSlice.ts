@@ -3,17 +3,25 @@ import { AUTH_SERVICE_URL } from "../../commons/constants";
 import { removeToken, storeToken } from "@/src/utils/utils";
 import { request } from "@/src/utils/callApi";
 import { Mixpanel } from "@/src/utils/mixpanel";
-import { getTotalAmount } from "./userSlice";
+import { getCategoryStatistics, getTotalAmount } from "./userSlice";
 
 // Kiểu dữ liệu user
+
+export interface CategoryStatistics {
+  categoryName: string;
+  total: number;
+  percentage: number;
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
   totalAmount?: number;
+  categoryStatistics?: CategoryStatistics[];
 }
 
-export interface LoginResponse {  
+export interface LoginResponse {
   id: string;
   name: string;
   email: string;
@@ -145,65 +153,79 @@ export const fetchTotalAmount = createAsyncThunk(
   }
 );
 
-export const authSlice = createSlice({
-  name: "auth",
-  initialState,
-  reducers: {
-    logout: (state) => {
-      Mixpanel.track("Logout", {});
-      state.currentUser = null;
-      state.error = null;
-      state.loading = false;
-    },
-  },
-  extraReducers: (builder) => {
-    // LOGIN
-    builder
-      .addCase(login.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(login.fulfilled, (state, action) => {
-        const user = {
-          id: action.payload.id,
-          name: action.payload.name,
-          email: action.payload.email,
-        };
-        Mixpanel.identify(user.id);
-        Mixpanel.people.set({
-          $email: user.email,
-          $name: user.name,
-        });
-        state.loading = false;
-        state.currentUser = user;
-        storeToken(action.payload.token);
-      })
-      .addCase(login.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-        Mixpanel.track("Login Failure", { reason: String(action.payload) });
-      });
+export const fetchCategoryStatistics = createAsyncThunk(
+  "fetchCategoryStatistics",
+  async (params: {}, { rejectWithValue, getState }) => {
+    const state = getState() as { auth: AuthState };
+    const currentUser = state.auth.currentUser;
+    const data = await getCategoryStatistics({ userId: currentUser?.id || '' });
+    return data.data;
+  }
+);
 
-    // REGISTER
-    builder
-      .addCase(register.pending, (state) => {
-        state.loading = true;
+export const authSlice = createSlice({
+    name: "auth",
+    initialState,
+    reducers: {
+      logout: (state) => {
+        Mixpanel.track("Logout", {});
+        state.currentUser = null;
         state.error = null;
-      })
-      .addCase(register.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentUser = action.payload;
-      })
-      .addCase(register.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
-    // FETCH TOTAL AMOUNT
-    builder
-      .addCase(fetchTotalAmount.fulfilled, (state, action) => {
-        state.currentUser!.totalAmount = action.payload;
-      });
-  },
+      },
+    },
+    extraReducers: (builder) => {
+      // LOGIN
+      builder
+        .addCase(login.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(login.fulfilled, (state, action) => {
+          const user = {
+            id: action.payload.id,
+            name: action.payload.name,
+            email: action.payload.email,
+          };
+          Mixpanel.identify(user.id);
+          Mixpanel.people.set({
+            $email: user.email,
+            $name: user.name,
+          });
+          state.loading = false;
+          state.currentUser = user;
+          storeToken(action.payload.token);
+        })
+        .addCase(login.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload as string;
+          Mixpanel.track("Login Failure", { reason: String(action.payload) });
+        });
+
+      // REGISTER
+      builder
+        .addCase(register.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(register.fulfilled, (state, action) => {
+          state.loading = false;
+          state.currentUser = action.payload;
+        })
+        .addCase(register.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload as string;
+        });
+      // FETCH TOTAL AMOUNT
+      builder
+        .addCase(fetchTotalAmount.fulfilled, (state, action) => {
+          state.currentUser!.totalAmount = action.payload;
+        });
+      builder
+        .addCase(fetchCategoryStatistics.fulfilled, (state, action) => {
+          state.currentUser!.categoryStatistics = action.payload;
+        });
+    },
 });
 
 export const { logout } = authSlice.actions;
