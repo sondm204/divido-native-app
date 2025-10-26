@@ -26,6 +26,7 @@ import { Category } from "../store/slices/expensesSlice";
 import { uploadImage } from "../api/uploadService";
 import * as ImagePicker from 'expo-image-picker';
 import { fetchTotalAmount } from "../store/slices/authSlice";
+import CustomModal from "../components/CustomModal";
 
 type ID = string;
 
@@ -51,6 +52,13 @@ type ExpenseFormParams = {
 type Props = {
   navigation: any;
   route: { params: ExpenseFormParams };
+};
+
+type ExpenseResponse = {
+  success: boolean;
+  message: string;
+  data: any;
+  warning?: string;
 };
 
 
@@ -101,6 +109,18 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
   const [ratioInput, setRatioInput] = useState<Record<string, string>>({});
   const [exactInput, setExactInput] = useState<Record<string, string>>({});
 
+  // modal state
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
+
+  // helper function to show modal
+  const showModal = (title: string, message: string) => {
+    setModalTitle(title);
+    setModalMessage(message);
+    setModalVisible(true);
+  };
+
   // fetch members, categories
   useEffect(() => {
     (async () => {
@@ -131,7 +151,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
           setRatioInput(r2);
         }
       } catch (e: any) {
-        Alert.alert("Lỗi", e?.message || "Không tải được dữ liệu nhóm");
+        showModal("Lỗi", e?.message || "Không tải được dữ liệu nhóm");
       }
     })();
   }, [groupId, initial?.shareRatios]);
@@ -149,7 +169,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission denied', 'Bạn cần cấp quyền để chọn ảnh 📷');
+        showModal('Permission denied', 'Bạn cần cấp quyền để chọn ảnh 📷');
         return;
       }
   
@@ -173,7 +193,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
       }
     } catch (error) {
       setLoading(false);
-      Alert.alert('Error', 'Tải ảnh thất bại, vui lòng thử lại.');
+      showModal('Error', 'Tải ảnh thất bại, vui lòng thử lại.');
       console.error('Image upload error:', error);
     }
   };
@@ -195,11 +215,11 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
 
   function buildPayload() {
     const amt = parseInt(amount || "0", 10);
-    if (!categoryId) return Alert.alert("Thiếu dữ liệu", "Chọn danh mục"), null;
-    if (!payerId) return Alert.alert("Thiếu dữ liệu", "Chọn người trả"), null;
-    if (!amt || amt <= 0) return Alert.alert("Thiếu dữ liệu", "Số tiền không hợp lệ"), null;
+    if (!categoryId) return showModal("Thiếu dữ liệu", "Chọn danh mục"), null;
+    if (!payerId) return showModal("Thiếu dữ liệu", "Chọn người trả"), null;
+    if (!amt || amt <= 0) return showModal("Thiếu dữ liệu", "Số tiền không hợp lệ"), null;
     if (!selectedIds.length)
-      return Alert.alert("Thiếu dữ liệu", "Chọn người tham gia chia"), null;
+      return showModal("Thiếu dữ liệu", "Chọn người tham gia chia"), null;
 
     let shareRatios: { user: { id: ID }; ratio: number }[] = [];
 
@@ -212,7 +232,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
         return { user: { id }, ratio: isNaN(v) ? 0 : v };
       });
       if (arr.every((x) => x.ratio <= 0)) {
-        Alert.alert("Thiếu dữ liệu", "Nhập tỷ lệ hợp lệ (> 0)");
+        showModal("Thiếu dữ liệu", "Nhập tỷ lệ hợp lệ (> 0)");
         return null;
       }
       // Use raw user-entered weights; backend can normalize when computing amounts
@@ -221,7 +241,7 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
       const values = selectedIds.map((id) => parseInt(exactInput[id] || "0", 10));
       const sum = values.reduce((s, v) => s + (isNaN(v) ? 0 : v), 0);
       if (sum !== amt) {
-        Alert.alert("Sai tổng tiền", `Tổng EXACT = ${sum} phải bằng ${amt}`);
+        showModal("Sai tổng tiền", `Tổng EXACT = ${sum} phải bằng ${amt}`);
         return null;
       }
       // Store raw entered amounts as weights to avoid rounding; UI will normalize when displaying
@@ -246,17 +266,26 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
 
     try {
       setLoading(true);
-      if (mode === "create") await dispatch(postCreateExpense({ groupId, body: payload })).unwrap();
-      else await dispatch(putUpdateExpense({ expenseId: expenseId as string, body: payload })).unwrap();
+      let response: ExpenseResponse;
+      if (mode === "create") {
+        response = await dispatch(postCreateExpense({ groupId, body: payload })).unwrap() as ExpenseResponse;
+        console.log("response", response);
+      } else {
+        response = await dispatch(putUpdateExpense({ expenseId: expenseId as string, body: payload })).unwrap() as ExpenseResponse;
+      }
 
-      await dispatch(fetchExpenses(groupId));
+      // Check for warning in response
+      if (response?.warning) {
+        Alert.alert("Cảnh báo", response.warning);
+      }
+
+      await dispatch(fetchExpenses({ groupId }));
       setLoading(false);
       dispatch(fetchTotalAmount({}));
-      dispatch(fetchGroups());
       navigation.goBack();
     } catch (e: any) {
       setLoading(false);
-      Alert.alert("Lỗi", e?.message || "Gửi dữ liệu thất bại");
+      showModal("Lỗi", e?.message || "Gửi dữ liệu thất bại");
     }
   }
 
@@ -469,6 +498,19 @@ export default function ExpenseFormScreen({ navigation, route }: Props) {
           />
         </View>
       </KeyboardAvoidingView>
+
+      {/* Custom Modal */}
+      <CustomModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      >
+        <Text style={{ color: TEXT_COLOR, fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
+          {modalTitle}
+        </Text>
+        <Text style={{ color: TEXT_COLOR, fontSize: 16 }}>
+          {modalMessage}
+        </Text>
+      </CustomModal>
     </SafeAreaView>
   );
 }

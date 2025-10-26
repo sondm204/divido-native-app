@@ -270,7 +270,13 @@ export const postCreateExpense = createAsyncThunk(
       const msg = await response.data as any;
       throw new Error(msg || "Fail to create expense");
     }
-    return response.data;
+    const data = await response.data as any;
+    return {
+      success: data.success,
+      message: data.message,
+      data: data.data,
+      warning: data.warning
+    };
   }
 );
 
@@ -286,7 +292,13 @@ export const putUpdateExpense = createAsyncThunk(
       const msg = await response.data as any;
       throw new Error(msg || "Fail to update expense");
     }
-    return response.data;
+    const data = await response.data as any;
+    return {
+      success: data.success,
+      message: data.message,
+      data: data.data,
+      warning: data.warning
+    };
   }
 );
 
