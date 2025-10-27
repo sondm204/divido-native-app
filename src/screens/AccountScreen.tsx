@@ -36,7 +36,7 @@ export default function AccountScreen() {
   };
 
   const menuItems = [
-    { icon: "wallet-outline", label: "Ví của tôi" },
+    { icon: "wallet-outline", label: "Ví của tôi", onPress: () => navigation.navigate("Wallet") },
     { icon: "people-outline", label: "Nhóm" },
     { icon: "link-outline", label: "Liên kết ngân hàng" },
     { icon: "calendar-outline", label: "Sự kiện" },

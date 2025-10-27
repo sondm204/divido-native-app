@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../store/slices/authSlice";
 import { AppDispatch, RootState } from "../../store/store";
 import { Mixpanel } from "../../utils/mixpanel";
+import { fetchCurrentUser } from "../../store/slices/userSlice";
 
 type RootStackParamList = {
     Login: undefined;
@@ -35,6 +36,7 @@ export default function LoginScreen() {
             const resultAction = await dispatch(login({ email, password }));
 
             if (login.fulfilled.match(resultAction)) {
+                dispatch(fetchCurrentUser(resultAction.payload.id));
                 // Login thành công
                 Mixpanel.track("Login Success", {});
                 navigation.replace("MainScreen");

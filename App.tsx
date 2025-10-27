@@ -26,6 +26,7 @@ import EmailScreen from "./src/screens/auth/EmailScreen";
 import { View } from "react-native";
 import { BACKGROUND_COLOR } from "./src/commons/constants";
 import SurveyScreen from "./src/screens/SurveyScreen";
+import WalletScreen from "./src/screens/WalletScreen";
 
 export type RootStackParamList = {
   SurveyScreen: undefined;
@@ -54,6 +55,7 @@ export type RootStackParamList = {
   VerifyCode: { email: string };
   Register: { email: string; verificationToken: string };
   Email: undefined;
+  Wallet: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -90,6 +92,7 @@ export default function App() {
                 <Stack.Screen name="Email" component={EmailScreen} />
                 <Stack.Screen name="Register" component={RegisterScreen} />
                 <Stack.Screen name="ForgotPassword" component={ForgetPasswordScreen} />
+                <Stack.Screen name="Wallet" component={WalletScreen} />
               </Stack.Navigator>
             </AppWrapper>
           </NavigationContainer>
